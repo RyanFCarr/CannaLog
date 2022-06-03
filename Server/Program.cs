@@ -1,8 +1,20 @@
+using Microsoft.EntityFrameworkCore;
+using Server.Contexts;
+using Server.Repositories;
+using Server.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
+// Add DbContexts
+builder.Services.AddDbContext<PlantContext>(b => b.UseSqlServer(builder.Configuration.GetConnectionString("CannaLog")));
+
+// Add Services and Repos
+builder.Services.AddScoped<IPlantService, PlantService>();
+builder.Services.AddScoped<IPlantRepository, PlantRepository>();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
