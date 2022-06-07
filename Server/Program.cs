@@ -19,6 +19,19 @@ builder.Services.AddScoped<IPlantRepository, PlantRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS BS
+var allowedOriginsPolicy = "allowedOriginsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: allowedOriginsPolicy,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                      });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -30,6 +43,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(allowedOriginsPolicy);
 app.UseAuthorization();
 
 app.MapControllers();
