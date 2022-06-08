@@ -1,10 +1,10 @@
 export default class Plant {
-    public Name?: string;
-    public Strain?: string;
-    public Breeder?: string;
-    public BaseNutrientsBrand?: string;
-    public IsFeminized: boolean = true;
-    public TargetPH: number = 6;
-    public TransplantDate?: Date;
-    public HarvestDate?: Date;
+    public name?: string;
+    public strain?: string;
+    public breeder?: string;
+    public baseNutrientsBrand?: string;
+    public isFeminized: boolean = true;
+    public targetPH: number = 6;
+    public transplantDate?: Date;
+    public harvestDate?: Date;
 }
