@@ -37,10 +37,6 @@ namespace Server.Repositories
 
         public Plant Update(Plant plant)
         {
-            var oldPlant = GetOne(plant.Id);
-
-            if (oldPlant == null) throw new ArgumentException("Plant not found");
-
             _context.Update(plant);
             _context.SaveChanges();
 

@@ -39,5 +39,12 @@ namespace Server.Controllers
             var plant = _plantService.Create(newPlant);
             return CreatedAtRoute("GetById", new { id = plant.Id }, plant);
         }
+
+        [HttpPut("{id}")]
+        public IActionResult Update([FromBody] Plant plant)
+        {
+            var updatedPlant = _plantService.Update(plant);
+            return Ok(updatedPlant);
+        }
     }
 }

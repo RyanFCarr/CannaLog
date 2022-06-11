@@ -1,9 +1,9 @@
-import { Save } from "@mui/icons-material";
 import { Autocomplete, Button, Checkbox, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, FormGroup, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 import { useQuery } from "../../hooks/useQuery";
+import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
 
 enum ViewMode {
@@ -21,6 +21,7 @@ enum TextVariants {
 const PlantDetail: React.FC = () => {
     const query = useQuery();
     const id = query.get("id");
+    const navigate = useNavigate();
 
 // #region State
     const [viewMode, setViewMode] = useState<string>(id ? ViewMode.VIEW : ViewMode.ADD);
@@ -42,25 +43,44 @@ const PlantDetail: React.FC = () => {
 // #endregion 
 
     const add = async () => {
-        await fetch("https://localhost:7247/Plant", {
+        const res = await fetch("https://localhost:7247/Plant", {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(plant)
         })
-        // Navigate to this page with query param id=
+        if (!res.ok) {
+            console.log(res.status, res.statusText);
+        } else {
+            const data: Plant = await res.json();
+            navigate(`/?id=${data.id}`);
+        }
     }
-    const update = () => {
-        alert("Update");
+    const update = async () => {
+        const res = await fetch(`https://localhost:7247/Plant/${plant.id}`, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(plant)
+        })
+        if (!res.ok) {
+            console.log(res.status, res.statusText);
+        } else {
+            const data: Plant = await res.json();
+            navigate(`/?id=${data.id}`);
+        }
     }
     const handleSubmit = () => {
         if (viewMode === ViewMode.VIEW) {
             setViewMode(ViewMode.EDIT);
         } else if (viewMode === ViewMode.ADD) {
             add();
+            setViewMode(ViewMode.VIEW);
         } else {
             update();
+            setViewMode(ViewMode.VIEW);
         }
     }
 
@@ -83,8 +103,18 @@ const PlantDetail: React.FC = () => {
         disabled?: boolean,
         InputLabelProps?: {shrink: boolean}
     };
+    let dateFieldProps: {
+        variant: TextVariants,
+        disabled?: boolean,
+        InputLabelProps?: {shrink: boolean}
+    };
     if (viewMode === ViewMode.VIEW) {
         textFieldProps = {
+            variant: TextVariants.STANDARD,
+            disabled: true,
+            InputLabelProps: {shrink: true}
+        };
+        dateFieldProps = {
             variant: TextVariants.STANDARD,
             disabled: true,
             InputLabelProps: {shrink: true}
@@ -92,7 +122,11 @@ const PlantDetail: React.FC = () => {
     } else {
         textFieldProps = {
             variant: TextVariants.OUTLINED
-        }
+        };
+        dateFieldProps = {
+            variant: TextVariants.OUTLINED,
+            InputLabelProps: {shrink: true}
+        };
     }
 
     return (
@@ -130,8 +164,8 @@ const PlantDetail: React.FC = () => {
                     <FormControlLabel control={<Checkbox defaultChecked {...textFieldProps} aria-label="Is Feminized" value={plant?.isFeminized} onChange={e => setPlant({...plant, isFeminized: e.currentTarget.checked})}/>} label="Is Feminized" />
                 </FormGroup>
                 <TextField label="Target PH" {...textFieldProps} value={plant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setPlant({...plant, targetPH: Number(e.currentTarget.value)})}/>
-                <TextField label="Transplant Date" {...textFieldProps} value={plant?.transplantDate?.toString().substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, transplantDate: new Date(e.currentTarget.value)})}/>
-                <TextField label="Harvest Date" {...textFieldProps} value={plant?.harvestDate?.toString().substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, harvestDate: new Date(e.currentTarget.value)})}/>
+                <TextField label="Transplant Date" {...dateFieldProps} value={plant?.transplantDate?.substring(0, 10)} type="date" onChange={e => setPlant({...plant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Harvest Date" {...dateFieldProps} value={plant?.harvestDate?.substring(0, 10)} type="date" onChange={e => setPlant({...plant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 
                 <Button variant="contained" color="error" onClick={() => alert('Are you sure?')}>Discard</Button>
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>
