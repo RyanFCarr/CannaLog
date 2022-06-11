@@ -6,6 +6,7 @@ import { useQuery } from "../../hooks/useQuery";
 import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
 
+//#region Enums
 enum ViewMode {
     VIEW = "View",
     ADD = "Add",
@@ -17,6 +18,10 @@ enum TextVariants {
     STANDARD = 'standard',
     OUTLINED = 'outlined'
 }
+//#endregion
+
+const autoFlowerSched = ["(18/6)", "(20/4)"];
+const photoperiodSched = ["Veg (18/6)", "Bloom (12/12)"];
 
 const PlantDetail: React.FC = () => {
     const query = useQuery();
@@ -28,7 +33,7 @@ const PlantDetail: React.FC = () => {
     const [plant, setPlant] = useState<Plant>(new Plant());
     const [open, toggleOpen] = useState(false);
     const [addNutesDialog, setAddNutesDialog] = useState<string>();
-    const [nutesDefault, setNutesDefault] = useState<string>("");
+    const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([""]);
 // #endregion
 // #region Dialog methods
     const handleClose = () => {
@@ -142,7 +147,7 @@ const PlantDetail: React.FC = () => {
                     options={["Add new", "General Hydroponics", "Advanced Nutrients"]}
                     renderInput={(params) => <TextField {...params} label="Base Nutrients Brand" {...textFieldProps} />}
                     value={plant?.baseNutrientsBrand || ""}
-                    inputValue={nutesDefault}
+                    inputValue={plant?.baseNutrientsBrand || ""}
                     onChange={(event, newValue) => {
                         if (newValue === 'Add new') {
                         // timeout to avoid instant validation of the dialog's form.
@@ -155,8 +160,67 @@ const PlantDetail: React.FC = () => {
                         }
                     }}
                     onInputChange={(event, newInputValue) => {
-                        setNutesDefault(newInputValue);
-                        }}
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
+                    selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
+                />
+                <Autocomplete
+                    options={["Autoflower", "Photoperiod"]}
+                    renderInput={(params) => <TextField {...params} label="Grow Type" {...textFieldProps} />}
+                    value={plant?.growType || ""}
+                    inputValue={plant?.growType || ""}
+                    onChange={(event, newValue) => {
+                        setPlant({...plant, growType: newValue || undefined});
+                        if (newValue === "Autoflower") {
+                            setLightingSchedOptions(autoFlowerSched);
+                        }else if (newValue === "Photoperiod") {
+                            setLightingSchedOptions(photoperiodSched);
+                        } else {
+                            setLightingSchedOptions([""]);
+                        }
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
+                    selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
+                />
+                <Autocomplete
+                    options={["LED", "HPS"]}
+                    renderInput={(params) => <TextField {...params} label="Lighting Type" {...textFieldProps} />}
+                    value={plant?.lightingType || ""}
+                    inputValue={plant?.lightingType || ""}
+                    onChange={(event, newValue) => {
+                        setPlant({...plant, lightingType: newValue || undefined})
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
+                    selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
+                />
+                <Autocomplete
+                    options={lightingSchedOptions}
+                    renderInput={(params) => <TextField {...params} label="Lighting Schedule" helperText={lightingSchedOptions[0] === "" ? "Choose a Grow Type" : ""} {...textFieldProps} />}
+                    value={plant?.lightingSchedule || ""}
+                    inputValue={plant?.lightingSchedule || ""}
+                    onChange={(event, newValue) => {
+                        setPlant({...plant, lightingSchedule: newValue || undefined})
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
+                    selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
+                />
+                <Autocomplete
+                    options={["Hydro", "Coco", "Soil"]}
+                    renderInput={(params) => <TextField {...params} label="Grow Medium" {...textFieldProps} />}
+                    value={plant?.growMedium || ""}
+                    inputValue={plant?.growMedium || ""}
+                    onChange={(event, newValue) => {
+                        setPlant({...plant, growMedium: newValue || undefined})
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
                     selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
                 />
                 
@@ -164,8 +228,8 @@ const PlantDetail: React.FC = () => {
                     <FormControlLabel control={<Checkbox defaultChecked {...textFieldProps} aria-label="Is Feminized" value={plant?.isFeminized} onChange={e => setPlant({...plant, isFeminized: e.currentTarget.checked})}/>} label="Is Feminized" />
                 </FormGroup>
                 <TextField label="Target PH" {...textFieldProps} value={plant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setPlant({...plant, targetPH: Number(e.currentTarget.value)})}/>
-                <TextField label="Transplant Date" {...dateFieldProps} value={plant?.transplantDate?.substring(0, 10)} type="date" onChange={e => setPlant({...plant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
-                <TextField label="Harvest Date" {...dateFieldProps} value={plant?.harvestDate?.substring(0, 10)} type="date" onChange={e => setPlant({...plant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Transplant Date" {...dateFieldProps} value={plant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Harvest Date" {...dateFieldProps} value={plant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 
                 <Button variant="contained" color="error" onClick={() => alert('Are you sure?')}>Discard</Button>
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>

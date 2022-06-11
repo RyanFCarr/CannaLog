@@ -11,5 +11,9 @@
         public decimal TargetPH { get; set; }
         public DateTime? TransplantDate { get; set; }
         public DateTime? HarvestDate { get; set; }
+        public string GrowType { get; set; }
+        public string LightingType { get; set; }
+        public string LightingSchedule { get; set; }
+        public string GrowMedium { get; set; }
     }
 }

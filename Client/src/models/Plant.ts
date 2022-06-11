@@ -8,4 +8,8 @@ export default class Plant {
     public targetPH: number = 6;
     public transplantDate?: string;
     public harvestDate?: string;
+    public growType?: string;
+    public growMedium?: string;
+    public lightingType?: string;
+    public lightingSchedule?: string;
 }
