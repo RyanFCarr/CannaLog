@@ -6,6 +6,25 @@ import { useQuery } from "../../hooks/useQuery";
 import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
 
+/**
+ * Discard button on Add
+ * navigate to main list (essentially back, if able to access from multiple screens)
+ * 
+ * Discard button on Edit
+ * Need to be able to revert to saved data
+ * Which means we need to track two models, the old and new
+ * On save, POST the new via update method
+ * On discard, reset new to old and change mode back to view
+ * 
+ * View mode retire/hide/soft delete
+ * Decide on verbage
+ * Create flag
+ * Hide them by default on main list
+ * Include new tab/checkbox/something to show them
+ */
+
+
+
 //#region Enums
 enum ViewMode {
     VIEW = "View",
@@ -63,18 +82,22 @@ const PlantDetail: React.FC = () => {
         }
     }
     const update = async () => {
-        const res = await fetch(`https://localhost:7247/Plant/${plant.id}`, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(plant)
-        })
-        if (!res.ok) {
-            console.log(res.status, res.statusText);
-        } else {
-            const data: Plant = await res.json();
-            navigate(`/?id=${data.id}`);
+        try {
+            const res = await fetch(`https://localhost:7247/Plant/${plant.id}`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(plant)
+            })
+            if (!res.ok) {
+                console.log(res.status, res.statusText);
+            } else {
+                const data: Plant = await res.json();
+                navigate(`/?id=${data.id}`);
+            }
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
         }
     }
     const handleSubmit = () => {
@@ -94,8 +117,12 @@ const PlantDetail: React.FC = () => {
             if (!id) return;
             try {
                 const res = await fetch(`https://localhost:7247/Plant/${id}`);
-                const plant = await res.json();
-                setPlant(plant);
+                if (!res.ok) {
+                    console.log(res.status, res.statusText);
+                } else {
+                    const plant = await res.json();
+                    setPlant(plant);
+                }
             } catch (e: any) {
                 console.log(JSON.stringify(e));
             }
