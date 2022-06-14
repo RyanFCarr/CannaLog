@@ -8,11 +8,6 @@ import Plant from "../../models/Plant";
 
 /**
  * TODO
- * Discard button on Edit
- * Need to be able to revert to saved data
- * Which means we need to track two models, the old and new
- * On save, POST the new via update method
- * On discard, reset new to old and change mode back to view
  * 
  * View mode archive
  * Create flag
@@ -46,7 +41,8 @@ const PlantDetail: React.FC = () => {
 
 // #region State
     const [viewMode, setViewMode] = useState<string>(id ? ViewMode.VIEW : ViewMode.ADD);
-    const [plant, setPlant] = useState<Plant>(new Plant());
+    const [editModePlant, setEditModePlant] = useState<Plant>(new Plant());
+    const [OGPlant, setOGPlant] = useState<Plant>(new Plant());
     const [open, toggleOpen] = useState(false);
     const [addNutesDialog, setAddNutesDialog] = useState<string>();
     const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([""]);
@@ -58,7 +54,7 @@ const PlantDetail: React.FC = () => {
     };
     const handleSubmitDialog = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setPlant({...plant, baseNutrientsBrand: addNutesDialog})
+        setEditModePlant({...editModePlant, baseNutrientsBrand: addNutesDialog})
         handleClose();
     };
 // #endregion 
@@ -69,7 +65,7 @@ const PlantDetail: React.FC = () => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(plant)
+            body: JSON.stringify(editModePlant)
         })
         if (!res.ok) {
             console.log(res.status, res.statusText);
@@ -80,12 +76,12 @@ const PlantDetail: React.FC = () => {
     }
     const update = async () => {
         try {
-            const res = await fetch(`https://localhost:7247/Plant/${plant.id}`, {
+            const res = await fetch(`https://localhost:7247/Plant/${editModePlant.id}`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(plant)
+                body: JSON.stringify(editModePlant)
             })
             if (!res.ok) {
                 console.log(res.status, res.statusText);
@@ -118,7 +114,8 @@ const PlantDetail: React.FC = () => {
                     console.log(res.status, res.statusText);
                 } else {
                     const plant = await res.json();
-                    setPlant(plant);
+                    setEditModePlant(plant);
+                    setOGPlant(plant);
                 }
             } catch (e: any) {
                 console.log(JSON.stringify(e));
@@ -164,14 +161,14 @@ const PlantDetail: React.FC = () => {
                 <Typography variant="h1">
                     {viewMode} Plant
                 </Typography>
-                <TextField label="Name" {...textFieldProps} value={plant?.name || ""} onChange={e => setPlant({...plant, name: e.currentTarget.value})}/>
-                <TextField label="Strain" {...textFieldProps} value={plant?.strain || ""} onChange={e => setPlant({...plant, strain: e.currentTarget.value})}/>
-                <TextField label="Breeder" {...textFieldProps} value={plant?.breeder || ""} onChange={e => setPlant({...plant, breeder: e.currentTarget.value})}/>
+                <TextField label="Name" {...textFieldProps} value={editModePlant?.name || ""} onChange={e => setEditModePlant({...editModePlant, name: e.currentTarget.value})}/>
+                <TextField label="Strain" {...textFieldProps} value={editModePlant?.strain || ""} onChange={e => setEditModePlant({...editModePlant, strain: e.currentTarget.value})}/>
+                <TextField label="Breeder" {...textFieldProps} value={editModePlant?.breeder || ""} onChange={e => setEditModePlant({...editModePlant, breeder: e.currentTarget.value})}/>
                 <Autocomplete
                     options={["Add new", "General Hydroponics", "Advanced Nutrients"]}
                     renderInput={(params) => <TextField {...params} label="Base Nutrients Brand" {...textFieldProps} />}
-                    value={plant?.baseNutrientsBrand || ""}
-                    inputValue={plant?.baseNutrientsBrand || ""}
+                    value={editModePlant?.baseNutrientsBrand || ""}
+                    inputValue={editModePlant?.baseNutrientsBrand || ""}
                     onChange={(event, newValue) => {
                         if (newValue === 'Add new') {
                         // timeout to avoid instant validation of the dialog's form.
@@ -180,7 +177,7 @@ const PlantDetail: React.FC = () => {
                             setAddNutesDialog(newValue);
                         });
                         } else {
-                            setPlant({...plant, baseNutrientsBrand: newValue || undefined})
+                            setEditModePlant({...editModePlant, baseNutrientsBrand: newValue || undefined})
                         }
                     }}
                     onInputChange={(event, newInputValue) => {
@@ -191,10 +188,10 @@ const PlantDetail: React.FC = () => {
                 <Autocomplete
                     options={["Autoflower", "Photoperiod"]}
                     renderInput={(params) => <TextField {...params} label="Grow Type" {...textFieldProps} />}
-                    value={plant?.growType || ""}
-                    inputValue={plant?.growType || ""}
+                    value={editModePlant?.growType || ""}
+                    inputValue={editModePlant?.growType || ""}
                     onChange={(event, newValue) => {
-                        setPlant({...plant, growType: newValue || undefined});
+                        setEditModePlant({...editModePlant, growType: newValue || undefined});
                         if (newValue === "Autoflower") {
                             setLightingSchedOptions(autoFlowerSched);
                         }else if (newValue === "Photoperiod") {
@@ -211,10 +208,10 @@ const PlantDetail: React.FC = () => {
                 <Autocomplete
                     options={["LED", "HPS"]}
                     renderInput={(params) => <TextField {...params} label="Lighting Type" {...textFieldProps} />}
-                    value={plant?.lightingType || ""}
-                    inputValue={plant?.lightingType || ""}
+                    value={editModePlant?.lightingType || ""}
+                    inputValue={editModePlant?.lightingType || ""}
                     onChange={(event, newValue) => {
-                        setPlant({...plant, lightingType: newValue || undefined})
+                        setEditModePlant({...editModePlant, lightingType: newValue || undefined})
                     }}
                     onInputChange={(event, newInputValue) => {
                         // Required for the Autocomplete to be considered "controlled"
@@ -224,10 +221,10 @@ const PlantDetail: React.FC = () => {
                 <Autocomplete
                     options={lightingSchedOptions}
                     renderInput={(params) => <TextField {...params} label="Lighting Schedule" helperText={lightingSchedOptions[0] === "" ? "Choose a Grow Type" : ""} {...textFieldProps} />}
-                    value={plant?.lightingSchedule || ""}
-                    inputValue={plant?.lightingSchedule || ""}
+                    value={editModePlant?.lightingSchedule || ""}
+                    inputValue={editModePlant?.lightingSchedule || ""}
                     onChange={(event, newValue) => {
-                        setPlant({...plant, lightingSchedule: newValue || undefined})
+                        setEditModePlant({...editModePlant, lightingSchedule: newValue || undefined})
                     }}
                     onInputChange={(event, newInputValue) => {
                         // Required for the Autocomplete to be considered "controlled"
@@ -237,10 +234,10 @@ const PlantDetail: React.FC = () => {
                 <Autocomplete
                     options={["Hydro", "Coco", "Soil"]}
                     renderInput={(params) => <TextField {...params} label="Grow Medium" {...textFieldProps} />}
-                    value={plant?.growMedium || ""}
-                    inputValue={plant?.growMedium || ""}
+                    value={editModePlant?.growMedium || ""}
+                    inputValue={editModePlant?.growMedium || ""}
                     onChange={(event, newValue) => {
-                        setPlant({...plant, growMedium: newValue || undefined})
+                        setEditModePlant({...editModePlant, growMedium: newValue || undefined})
                     }}
                     onInputChange={(event, newInputValue) => {
                         // Required for the Autocomplete to be considered "controlled"
@@ -249,14 +246,14 @@ const PlantDetail: React.FC = () => {
                 />
                 
                 <FormGroup>
-                    <FormControlLabel control={<Checkbox defaultChecked {...textFieldProps} aria-label="Is Feminized" value={plant?.isFeminized} onChange={e => setPlant({...plant, isFeminized: e.currentTarget.checked})}/>} label="Is Feminized" />
+                    <FormControlLabel control={<Checkbox defaultChecked {...textFieldProps} aria-label="Is Feminized" value={editModePlant?.isFeminized} onChange={e => setEditModePlant({...editModePlant, isFeminized: e.currentTarget.checked})}/>} label="Is Feminized" />
                 </FormGroup>
-                <TextField label="Target PH" {...textFieldProps} value={plant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setPlant({...plant, targetPH: Number(e.currentTarget.value)})}/>
-                <TextField label="Transplant Date" {...dateFieldProps} value={plant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
-                <TextField label="Harvest Date" {...dateFieldProps} value={plant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Target PH" {...textFieldProps} value={editModePlant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setEditModePlant({...editModePlant, targetPH: Number(e.currentTarget.value)})}/>
+                <TextField label="Transplant Date" {...dateFieldProps} value={editModePlant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Harvest Date" {...dateFieldProps} value={editModePlant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 
                 {viewMode === ViewMode.ADD && <Button variant="contained" color="error" href="/plants">Discard</Button>}
-                {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={() => setViewMode(ViewMode.VIEW)}>Discard</Button>}
+                {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={() => {setViewMode(ViewMode.VIEW); setEditModePlant(OGPlant);}}>Discard</Button>}
                 {viewMode === ViewMode.VIEW && <Button variant="contained" color="error" onClick={() => alert("ARCHIVED")}>Archive</Button>}
                 
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>
