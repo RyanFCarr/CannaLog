@@ -1,9 +1,17 @@
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
+import { Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { parseISO, differenceInDays } from "date-fns";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 import Plant from "../../models/Plant";
+
+
+/**
+ * Determine what to do when there are no records
+ * Add btn
+ */
+
 
 const PlantList: React.FC = () => {
     const [plants, setPlants] = useState<Plant[]>();
@@ -33,15 +41,16 @@ const PlantList: React.FC = () => {
                     <TableHead>
                     <TableRow>
                         <TableCell>Name</TableCell>
-                        <TableCell align="right">Strain</TableCell>
-                        <TableCell align="right">Breeder</TableCell>
-                        <TableCell align="right">Target PH</TableCell>
-                        <TableCell align="right">Transplant Date</TableCell>
-                        <TableCell align="right">Age</TableCell>
+                        <TableCell>Strain</TableCell>
+                        <TableCell>Breeder</TableCell>
+                        <TableCell>Target PH</TableCell>
+                        <TableCell>Transplant Date</TableCell>
+                        <TableCell>Age</TableCell>
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                        {plants?.map((plant) => (
+                        {!plants?.length && <TableRow><TableCell align="center" colSpan={6}>No rows</TableCell></TableRow>}
+                        {plants && plants.map((plant) => (
                             <TableRow
                                 key={plant.id}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
@@ -50,16 +59,17 @@ const PlantList: React.FC = () => {
                             <TableCell component="th" scope="row">
                                 {plant.name}
                             </TableCell>
-                            <TableCell align="right">{plant.strain}</TableCell>
-                            <TableCell align="right">{plant.breeder}</TableCell>
-                            <TableCell align="right">{plant.targetPH}</TableCell>
-                            <TableCell align="right">{plant.transplantDate?.substring(0, 10)}</TableCell>
-                            <TableCell align="right">{plant.transplantDate ? differenceInDays(new Date(), parseISO(plant.transplantDate)).toString() : ""}</TableCell>
+                            <TableCell>{plant.strain}</TableCell>
+                            <TableCell>{plant.breeder}</TableCell>
+                            <TableCell>{plant.targetPH}</TableCell>
+                            <TableCell>{plant.transplantDate?.substring(0, 10)}</TableCell>
+                            <TableCell>{plant.transplantDate ? differenceInDays(new Date(), parseISO(plant.transplantDate)).toString() : ""}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-                </TableContainer>
+            </TableContainer>
+            <Button href="/plant" variant="contained" startIcon={<AddIcon />}>Add Plant</Button>
         </Container>
     )
 }

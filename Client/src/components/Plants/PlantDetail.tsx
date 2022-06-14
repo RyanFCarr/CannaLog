@@ -7,17 +7,14 @@ import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
 
 /**
- * Discard button on Add
- * navigate to main list (essentially back, if able to access from multiple screens)
- * 
+ * TODO
  * Discard button on Edit
  * Need to be able to revert to saved data
  * Which means we need to track two models, the old and new
  * On save, POST the new via update method
  * On discard, reset new to old and change mode back to view
  * 
- * View mode retire/hide/soft delete
- * Decide on verbage
+ * View mode archive
  * Create flag
  * Hide them by default on main list
  * Include new tab/checkbox/something to show them
@@ -94,7 +91,7 @@ const PlantDetail: React.FC = () => {
                 console.log(res.status, res.statusText);
             } else {
                 const data: Plant = await res.json();
-                navigate(`/?id=${data.id}`);
+                navigate(`/plant?id=${data.id}`);
             }
         } catch (e: any) {
             console.log(JSON.stringify(e));
@@ -258,7 +255,10 @@ const PlantDetail: React.FC = () => {
                 <TextField label="Transplant Date" {...dateFieldProps} value={plant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 <TextField label="Harvest Date" {...dateFieldProps} value={plant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setPlant({...plant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 
-                <Button variant="contained" color="error" onClick={() => alert('Are you sure?')}>Discard</Button>
+                {viewMode === ViewMode.ADD && <Button variant="contained" color="error" href="/plants">Discard</Button>}
+                {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={() => setViewMode(ViewMode.VIEW)}>Discard</Button>}
+                {viewMode === ViewMode.VIEW && <Button variant="contained" color="error" onClick={() => alert("ARCHIVED")}>Archive</Button>}
+                
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>
             </Container>
             <Dialog open={open} onClose={handleClose}>
