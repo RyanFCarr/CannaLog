@@ -12,4 +12,6 @@ export default class Plant {
     public growMedium?: string;
     public lightingType?: string;
     public lightingSchedule?: string;
+    public status?: string;
+    public terminationReason?: string;
 }

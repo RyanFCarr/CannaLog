@@ -15,5 +15,7 @@
         public string LightingType { get; set; }
         public string LightingSchedule { get; set; }
         public string GrowMedium { get; set; }
+        public string Status { get; set; }
+        public string? TerminationReason { get; set; }
     }
 }

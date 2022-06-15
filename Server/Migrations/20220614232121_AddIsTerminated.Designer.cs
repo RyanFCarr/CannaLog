@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Server.Contexts;
 
@@ -11,9 +12,10 @@ using Server.Contexts;
 namespace Server.Migrations
 {
     [DbContext(typeof(PlantContext))]
-    partial class PlantContextModelSnapshot : ModelSnapshot
+    [Migration("20220614232121_AddIsTerminated")]
+    partial class AddIsTerminated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,6 +53,9 @@ namespace Server.Migrations
                     b.Property<bool>("IsFeminized")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsTerminated")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LightingSchedule")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -63,18 +68,11 @@ namespace Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Strain")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("TargetPH")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("TerminationReason")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("TransplantDate")
                         .HasColumnType("datetime2");

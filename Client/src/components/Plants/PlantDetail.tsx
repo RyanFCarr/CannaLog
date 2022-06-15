@@ -5,14 +5,18 @@ import { useEffectOnce } from "../../hooks/useEffectOnce";
 import { useQuery } from "../../hooks/useQuery";
 import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
+import { trimToUndefined } from "../../util/functions";
 
 /**
  * TODO
  * 
  * View mode archive
- * Create flag
  * Hide them by default on main list
  * Include new tab/checkbox/something to show them
+ * 
+ * Fix the trimming
+ *  Trim in handleSubmit instead of onChange
+ *  Maybe make it a validate method
  */
 
 
@@ -104,6 +108,17 @@ const PlantDetail: React.FC = () => {
             setViewMode(ViewMode.VIEW);
         }
     }
+    const handleEditDiscard = () => {
+        setViewMode(ViewMode.VIEW);
+        setEditModePlant(OGPlant);
+        setDefaultLightingSchedule(OGPlant);
+    }
+    const setDefaultLightingSchedule = (plant: Plant) => {
+        if (plant.growType === "Autoflower")
+            setLightingSchedOptions(autoFlowerSched);
+        if (plant.growType === "Photoperiod")
+            setLightingSchedOptions(photoperiodSched);
+    }
 
     useEffectOnce(() => {
         const getPlant = async () => {
@@ -113,9 +128,10 @@ const PlantDetail: React.FC = () => {
                 if (!res.ok) {
                     console.log(res.status, res.statusText);
                 } else {
-                    const plant = await res.json();
+                    const plant: Plant = await res.json();
                     setEditModePlant(plant);
                     setOGPlant(plant);
+                    setDefaultLightingSchedule(plant);
                 }
             } catch (e: any) {
                 console.log(JSON.stringify(e));
@@ -161,9 +177,9 @@ const PlantDetail: React.FC = () => {
                 <Typography variant="h1">
                     {viewMode} Plant
                 </Typography>
-                <TextField label="Name" {...textFieldProps} value={editModePlant?.name || ""} onChange={e => setEditModePlant({...editModePlant, name: e.currentTarget.value})}/>
-                <TextField label="Strain" {...textFieldProps} value={editModePlant?.strain || ""} onChange={e => setEditModePlant({...editModePlant, strain: e.currentTarget.value})}/>
-                <TextField label="Breeder" {...textFieldProps} value={editModePlant?.breeder || ""} onChange={e => setEditModePlant({...editModePlant, breeder: e.currentTarget.value})}/>
+                <TextField label="Name" {...textFieldProps} value={editModePlant?.name || ""} onChange={e => setEditModePlant({...editModePlant, name: trimToUndefined(e.currentTarget.value)})}/>
+                <TextField label="Strain" {...textFieldProps} value={editModePlant?.strain || ""} onChange={e => setEditModePlant({...editModePlant, strain: trimToUndefined(e.currentTarget.value)})}/>
+                <TextField label="Breeder" {...textFieldProps} value={editModePlant?.breeder || ""} onChange={e => setEditModePlant({...editModePlant, breeder: trimToUndefined(e.currentTarget.value)})}/>
                 <Autocomplete
                     options={["Add new", "General Hydroponics", "Advanced Nutrients"]}
                     renderInput={(params) => <TextField {...params} label="Base Nutrients Brand" {...textFieldProps} />}
@@ -251,10 +267,24 @@ const PlantDetail: React.FC = () => {
                 <TextField label="Target PH" {...textFieldProps} value={editModePlant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setEditModePlant({...editModePlant, targetPH: Number(e.currentTarget.value)})}/>
                 <TextField label="Transplant Date" {...dateFieldProps} value={editModePlant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
                 <TextField label="Harvest Date" {...dateFieldProps} value={editModePlant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
-                
+
+                <Autocomplete
+                    options={["Seed", "Active", "Terminated"]}
+                    renderInput={(params) => <TextField {...params} label="Status" {...textFieldProps} />}
+                    value={editModePlant?.status || ""}
+                    inputValue={editModePlant?.status || ""}
+                    onChange={(event, newValue) => {
+                        setEditModePlant({...editModePlant, status: newValue || undefined, terminationReason: newValue !== "Terminated" ? undefined : editModePlant.terminationReason})
+                    }}
+                    onInputChange={(event, newInputValue) => {
+                        // Required for the Autocomplete to be considered "controlled"
+                    }}
+                    selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
+                />
+                {editModePlant.status === "Terminated" && <TextField label="Termination Reason" {...textFieldProps} value={editModePlant.terminationReason || ""} onChange={e => setEditModePlant({...editModePlant, terminationReason: trimToUndefined(e.currentTarget.value)})} />}
+
                 {viewMode === ViewMode.ADD && <Button variant="contained" color="error" href="/plants">Discard</Button>}
-                {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={() => {setViewMode(ViewMode.VIEW); setEditModePlant(OGPlant);}}>Discard</Button>}
-                {viewMode === ViewMode.VIEW && <Button variant="contained" color="error" onClick={() => alert("ARCHIVED")}>Archive</Button>}
+                {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={handleEditDiscard}>Discard</Button>}
                 
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>
             </Container>

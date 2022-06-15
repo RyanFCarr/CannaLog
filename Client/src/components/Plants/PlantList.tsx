@@ -6,13 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 import Plant from "../../models/Plant";
 
-
-/**
- * Determine what to do when there are no records
- * Add btn
- */
-
-
 const PlantList: React.FC = () => {
     const [plants, setPlants] = useState<Plant[]>();
     const navigate = useNavigate();
@@ -34,7 +27,7 @@ const PlantList: React.FC = () => {
     }, []);
 
     return (
-        <Container maxWidth="sm" style={{backgroundColor: "grey"}}>
+        <Container maxWidth="md" style={{backgroundColor: "grey"}}>
             <Typography variant="h1">Plant List</Typography>
             <TableContainer component={Paper}>
                 <Table sx={{ minWidth: 650 }}>
