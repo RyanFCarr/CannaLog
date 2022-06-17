@@ -2,9 +2,22 @@ import { Add as AddIcon, ArrowForwardIos as ForwardArrowIcon } from "@mui/icons-
 import { Button, Container, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { parseISO, differenceInDays } from "date-fns";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 import Plant from "../../models/Plant";
+import PlantDetail from "./PlantDetail";
+
+const Layout: React.FC = () => {
+    return (
+        <>
+            <Routes>
+                <Route index element={<PlantList />} />
+                <Route path="add" element={<PlantDetail />} />
+                <Route path=":plantId/*" element={<PlantDetail />} />
+            </Routes>
+        </>
+    )
+}
 
 const PlantList: React.FC = () => {
     const [plants, setPlants] = useState<Plant[]>();
@@ -64,4 +77,4 @@ const PlantList: React.FC = () => {
     )
 }
 
-export default PlantList;
+export default Layout;

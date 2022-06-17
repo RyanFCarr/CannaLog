@@ -1,11 +1,11 @@
 import { Autocomplete, Button, Checkbox, Container, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControlLabel, FormGroup, TextField, Typography } from "@mui/material";
+import { Add as AddIcon } from "@mui/icons-material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
-import { useQuery } from "../../hooks/useQuery";
-import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
 import { toShortDate, trimToUndefined } from "../../util/functions";
+import GrowLogList from "../Logs/GrowLogList";
 
 //#region Enums
 enum ViewMode {
@@ -24,13 +24,24 @@ enum TextVariants {
 const autoFlowerSched = ["(18/6)", "(20/4)"];
 const photoperiodSched = ["Veg (18/6)", "Bloom (12/12)"];
 
+const Layout: React.FC = () => {
+    return (
+        <>
+            <Routes>
+                <Route index element={<PlantDetail />} />
+                <Route path="growLogs/*" element={<GrowLogList />} />
+            </Routes>
+        </>
+    );
+}
+
 const PlantDetail: React.FC = () => {
-    const query = useQuery();
-    const id = query.get("id");
+    
+    const { plantId } = useParams();
     const navigate = useNavigate();
 
 // #region State
-    const [viewMode, setViewMode] = useState<string>(id ? ViewMode.VIEW : ViewMode.ADD);
+    const [viewMode, setViewMode] = useState<string>(plantId ? ViewMode.VIEW : ViewMode.ADD);
     const [editModePlant, setEditModePlant] = useState<Plant>(new Plant());
     const [OGPlant, setOGPlant] = useState<Plant>(new Plant());
     const [open, toggleOpen] = useState(false);
@@ -64,7 +75,7 @@ const PlantDetail: React.FC = () => {
                 console.log(res.status, res.statusText);
             } else {
                 const data: Plant = await res.json();
-                navigate(`/plant?id=${data.id}`);
+                navigate(`/plants?id=${data.id}`);
             }
         } catch (e: any) {
             console.log(JSON.stringify(e));
@@ -84,7 +95,7 @@ const PlantDetail: React.FC = () => {
                 console.log(res.status, res.statusText);
             } else {
                 const data: Plant = await res.json();
-                navigate(`/plant?id=${data.id}`);
+                navigate(`/plants?id=${data.id}`);
             }
         } catch (e: any) {
             console.log(JSON.stringify(e));
@@ -124,9 +135,9 @@ const PlantDetail: React.FC = () => {
 
     useEffectOnce(() => {
         const getPlant = async () => {
-            if (!id) return;
+            if (!plantId) return;
             try {
-                const res = await fetch(`https://localhost:7247/Plant/${id}`);
+                const res = await fetch(`https://localhost:7247/Plant/${plantId}`);
                 if (!res.ok) {
                     console.log(res.status, res.statusText);
                 } else {
@@ -172,7 +183,6 @@ const PlantDetail: React.FC = () => {
             InputLabelProps: {shrink: true}
         };
     }
-
     return (
         <>
             <Container maxWidth="sm" style={{backgroundColor: "grey"}}>
@@ -289,6 +299,7 @@ const PlantDetail: React.FC = () => {
                 {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={handleEditDiscard}>Discard</Button>}
                 
                 <Button variant="contained" color="success" onClick={handleSubmit}>{viewMode === ViewMode.VIEW ? "Edit" : "Save"}</Button>
+                {viewMode === ViewMode.VIEW && <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate(`/plants/${editModePlant.id}/growLog`)}>Add a Grow Log</Button>}
             </Container>
             <Dialog open={open} onClose={handleClose}>
                 <form onSubmit={handleSubmitDialog}>
@@ -318,7 +329,6 @@ const PlantDetail: React.FC = () => {
             </Dialog>
         </>
     )
-    
 }
 
-export default PlantDetail;
+export default Layout;
