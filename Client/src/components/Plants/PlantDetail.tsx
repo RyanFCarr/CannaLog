@@ -5,21 +5,7 @@ import { useEffectOnce } from "../../hooks/useEffectOnce";
 import { useQuery } from "../../hooks/useQuery";
 import { format, parseISO } from "date-fns";
 import Plant from "../../models/Plant";
-import { trimToUndefined } from "../../util/functions";
-
-/**
- * TODO
- * 
- * View mode archive
- * Hide them by default on main list
- * Include new tab/checkbox/something to show them
- * 
- * Fix the trimming
- *  Trim in handleSubmit instead of onChange
- *  Maybe make it a validate method
- */
-
-
+import { toShortDate, trimToUndefined } from "../../util/functions";
 
 //#region Enums
 enum ViewMode {
@@ -64,22 +50,29 @@ const PlantDetail: React.FC = () => {
 // #endregion 
 
     const add = async () => {
-        const res = await fetch("https://localhost:7247/Plant", {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(editModePlant)
-        })
-        if (!res.ok) {
-            console.log(res.status, res.statusText);
-        } else {
-            const data: Plant = await res.json();
-            navigate(`/?id=${data.id}`);
+        try {
+            validateForm()
+            const res = await fetch("https://localhost:7247/Plant", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(editModePlant)
+            })
+            
+            if (!res.ok) {
+                console.log(res.status, res.statusText);
+            } else {
+                const data: Plant = await res.json();
+                navigate(`/plant?id=${data.id}`);
+            }
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
         }
     }
     const update = async () => {
         try {
+            validateForm();
             const res = await fetch(`https://localhost:7247/Plant/${editModePlant.id}`, {
                 method: "PUT",
                 headers: {
@@ -118,6 +111,15 @@ const PlantDetail: React.FC = () => {
             setLightingSchedOptions(autoFlowerSched);
         if (plant.growType === "Photoperiod")
             setLightingSchedOptions(photoperiodSched);
+    }
+    const validateForm = () => {
+        setEditModePlant({
+            ...editModePlant,
+            name: trimToUndefined(editModePlant.name),
+            strain: trimToUndefined(editModePlant.strain),
+            breeder: trimToUndefined(editModePlant.breeder),
+            terminationReason: trimToUndefined(editModePlant.terminationReason)
+        });
     }
 
     useEffectOnce(() => {
@@ -177,9 +179,9 @@ const PlantDetail: React.FC = () => {
                 <Typography variant="h1">
                     {viewMode} Plant
                 </Typography>
-                <TextField label="Name" {...textFieldProps} value={editModePlant?.name || ""} onChange={e => setEditModePlant({...editModePlant, name: trimToUndefined(e.currentTarget.value)})}/>
-                <TextField label="Strain" {...textFieldProps} value={editModePlant?.strain || ""} onChange={e => setEditModePlant({...editModePlant, strain: trimToUndefined(e.currentTarget.value)})}/>
-                <TextField label="Breeder" {...textFieldProps} value={editModePlant?.breeder || ""} onChange={e => setEditModePlant({...editModePlant, breeder: trimToUndefined(e.currentTarget.value)})}/>
+                <TextField label="Name" {...textFieldProps} value={editModePlant?.name || ""} onChange={e => setEditModePlant({...editModePlant, name: e.currentTarget.value})}/>
+                <TextField label="Strain" {...textFieldProps} value={editModePlant?.strain || ""} onChange={e => setEditModePlant({...editModePlant, strain: e.currentTarget.value})}/>
+                <TextField label="Breeder" {...textFieldProps} value={editModePlant?.breeder || ""} onChange={e => setEditModePlant({...editModePlant, breeder: e.currentTarget.value})}/>
                 <Autocomplete
                     options={["Add new", "General Hydroponics", "Advanced Nutrients"]}
                     renderInput={(params) => <TextField {...params} label="Base Nutrients Brand" {...textFieldProps} />}
@@ -265,8 +267,8 @@ const PlantDetail: React.FC = () => {
                     <FormControlLabel control={<Checkbox defaultChecked {...textFieldProps} aria-label="Is Feminized" value={editModePlant?.isFeminized} onChange={e => setEditModePlant({...editModePlant, isFeminized: e.currentTarget.checked})}/>} label="Is Feminized" />
                 </FormGroup>
                 <TextField label="Target PH" {...textFieldProps} value={editModePlant?.targetPH || 6} type="number" inputProps={{step: 0.1}} onChange={e => setEditModePlant({...editModePlant, targetPH: Number(e.currentTarget.value)})}/>
-                <TextField label="Transplant Date" {...dateFieldProps} value={editModePlant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, transplantDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
-                <TextField label="Harvest Date" {...dateFieldProps} value={editModePlant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, harvestDate: format(parseISO(e.currentTarget.value), 'yyyy-MM-dd')})}/>
+                <TextField label="Transplant Date" {...dateFieldProps} value={editModePlant?.transplantDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, transplantDate: toShortDate(e.currentTarget.value)})}/>
+                <TextField label="Harvest Date" {...dateFieldProps} value={editModePlant?.harvestDate?.substring(0, 10) || ""} type="date" onChange={e => setEditModePlant({...editModePlant, harvestDate: toShortDate(e.currentTarget.value)})}/>
 
                 <Autocomplete
                     options={["Seed", "Active", "Terminated"]}
@@ -281,7 +283,7 @@ const PlantDetail: React.FC = () => {
                     }}
                     selectOnFocus clearOnBlur handleHomeEndKeys freeSolo
                 />
-                {editModePlant.status === "Terminated" && <TextField label="Termination Reason" {...textFieldProps} value={editModePlant.terminationReason || ""} onChange={e => setEditModePlant({...editModePlant, terminationReason: trimToUndefined(e.currentTarget.value)})} />}
+                {editModePlant.status === "Terminated" && <TextField label="Termination Reason" {...textFieldProps} value={editModePlant.terminationReason || ""} onChange={e => setEditModePlant({...editModePlant, terminationReason: e.currentTarget.value})} />}
 
                 {viewMode === ViewMode.ADD && <Button variant="contained" color="error" href="/plants">Discard</Button>}
                 {viewMode === ViewMode.EDIT && <Button variant="contained" color="error" onClick={handleEditDiscard}>Discard</Button>}

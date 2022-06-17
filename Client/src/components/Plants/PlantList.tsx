@@ -1,5 +1,5 @@
-import { Add as AddIcon } from "@mui/icons-material";
-import { Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Add as AddIcon, ArrowForwardIos as ForwardArrowIcon } from "@mui/icons-material";
+import { Button, Container, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { parseISO, differenceInDays } from "date-fns";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -35,28 +35,25 @@ const PlantList: React.FC = () => {
                     <TableRow>
                         <TableCell>Name</TableCell>
                         <TableCell>Strain</TableCell>
-                        <TableCell>Breeder</TableCell>
-                        <TableCell>Target PH</TableCell>
-                        <TableCell>Transplant Date</TableCell>
                         <TableCell>Age</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell></TableCell>
                     </TableRow>
                     </TableHead>
                     <TableBody>
-                        {!plants?.length && <TableRow><TableCell align="center" colSpan={6}>No rows</TableCell></TableRow>}
+                        {!plants?.length && <TableRow><TableCell align="center" colSpan={4}>No rows</TableCell></TableRow>}
                         {plants && plants.map((plant) => (
                             <TableRow
                                 key={plant.id}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                onClick={() => navigate(`/plant?id=${plant.id}`)}
                             >
-                            <TableCell component="th" scope="row">
-                                {plant.name}
-                            </TableCell>
-                            <TableCell>{plant.strain}</TableCell>
-                            <TableCell>{plant.breeder}</TableCell>
-                            <TableCell>{plant.targetPH}</TableCell>
-                            <TableCell>{plant.transplantDate?.substring(0, 10)}</TableCell>
-                            <TableCell>{plant.transplantDate ? differenceInDays(new Date(), parseISO(plant.transplantDate)).toString() : ""}</TableCell>
+                                <TableCell component="th" scope="row">
+                                    {plant.name}
+                                </TableCell>
+                                <TableCell>{plant.strain}</TableCell>
+                                <TableCell>{plant.transplantDate ? `${differenceInDays(plant.harvestDate ? parseISO(plant.harvestDate) : new Date(), parseISO(plant.transplantDate)).toString()} days` : ""}</TableCell>
+                                <TableCell>{plant.status}</TableCell>
+                                <TableCell><IconButton onClick={() => navigate(`/plant?id=${plant.id}`)}><ForwardArrowIcon/></IconButton></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
