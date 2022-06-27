@@ -24,7 +24,7 @@ namespace Server.Controllers
             return _plantService.GetAll();
         }
 
-        [HttpGet("{id}", Name = "GetById")]
+        [HttpGet("{id}", Name = "GetPlantById")]
         public IActionResult GetById([FromRoute] int id)
         {
             var plant = _plantService.GetOne(id);
@@ -37,7 +37,7 @@ namespace Server.Controllers
         public IActionResult Create([FromBody] Plant newPlant)
         {
             var plant = _plantService.Create(newPlant);
-            return CreatedAtRoute("GetById", new { id = plant.Id }, plant);
+            return CreatedAtRoute("GetPlantById", new { id = plant.Id }, plant);
         }
 
         [HttpPut("{id}")]

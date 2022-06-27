@@ -1,10 +1,24 @@
-import { Add as AddIcon, ArrowForwardIos as ForwardArrowIcon } from "@mui/icons-material";
-import { Button, Container, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
-import { parseISO, differenceInDays } from "date-fns";
+import {
+    Add as AddIcon,
+    ArrowForwardIos as ForwardArrowIcon,
+} from "@mui/icons-material";
+import {
+    Box,
+    Button,
+    Paper,
+    Table,
+    TableBody,
+    TableContainer,
+    TableHead,
+    TableRow,
+} from "@mui/material";
+import TableCell from "../Themed/ThemedTableCell";
+import IconButton from "../Themed/ThemedIconButton";
 import { useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../hooks/useEffectOnce";
 import Plant from "../../models/Plant";
+import { useAppContext } from "../App";
 import PlantDetail from "./PlantDetail";
 
 const Layout: React.FC = () => {
@@ -16,12 +30,14 @@ const Layout: React.FC = () => {
                 <Route path=":plantId/*" element={<PlantDetail />} />
             </Routes>
         </>
-    )
-}
+    );
+};
 
 const PlantList: React.FC = () => {
     const [plants, setPlants] = useState<Plant[]>();
     const navigate = useNavigate();
+    const { setPageTitle, setFooter } = useAppContext();
+    const pageTitle = "Plant List";
 
     useEffectOnce(() => {
         const getPlants = async () => {
@@ -36,45 +52,81 @@ const PlantList: React.FC = () => {
                 console.log(JSON.stringify(e));
             }
         };
+        setPageTitle(pageTitle);
+        setFooter(Footer);
         getPlants();
     }, []);
 
     return (
-        <Container maxWidth="md" style={{backgroundColor: "grey"}}>
-            <Typography variant="h1">Plant List</Typography>
-            <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }}>
-                    <TableHead>
+        <Table>
+            <TableHead>
+                <TableRow>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Strain</TableCell>
+                    {/* <TableCell>Age</TableCell> */}
+                    <TableCell>Status</TableCell>
+                    <TableCell></TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                {!plants?.length && (
                     <TableRow>
-                        <TableCell>Name</TableCell>
-                        <TableCell>Strain</TableCell>
-                        <TableCell>Age</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell></TableCell>
+                        <TableCell align="center" colSpan={4}>
+                            No rows
+                        </TableCell>
                     </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {!plants?.length && <TableRow><TableCell align="center" colSpan={4}>No rows</TableCell></TableRow>}
-                        {plants && plants.map((plant) => (
-                            <TableRow
-                                key={plant.id}
-                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                            >
-                                <TableCell component="th" scope="row">
-                                    {plant.name}
-                                </TableCell>
-                                <TableCell>{plant.strain}</TableCell>
-                                <TableCell>{plant.transplantDate ? `${differenceInDays(plant.harvestDate ? parseISO(plant.harvestDate) : new Date(), parseISO(plant.transplantDate)).toString()} days` : ""}</TableCell>
-                                <TableCell>{plant.status}</TableCell>
-                                <TableCell><IconButton onClick={() => navigate(`/plant?id=${plant.id}`)}><ForwardArrowIcon/></IconButton></TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            <Button href="/plant" variant="contained" startIcon={<AddIcon />}>Add Plant</Button>
-        </Container>
-    )
-}
+                )}
+                {plants &&
+                    plants.map((plant) => (
+                        <TableRow
+                            key={plant.id}
+                            sx={{
+                                "&:last-child td, &:last-child th": {
+                                    border: 0,
+                                },
+                            }}
+                        >
+                            <TableCell component="th" scope="row">
+                                {plant.name}
+                            </TableCell>
+                            <TableCell>{plant.strain}</TableCell>
+                            {/* <TableCell>
+                                        {plant.transplantDate
+                                            ? `${differenceInDays(
+                                                  plant.harvestDate
+                                                      ? parseISO(
+                                                            plant.harvestDate
+                                                        )
+                                                      : new Date(),
+                                                  parseISO(plant.transplantDate)
+                                              ).toString()} days`
+                                            : ""}
+                                    </TableCell> */}
+                            <TableCell>{plant.status}</TableCell>
+                            <TableCell>
+                                <IconButton
+                                    onClick={() =>
+                                        navigate(`/plants/${plant.id}`)
+                                    }
+                                >
+                                    <ForwardArrowIcon />
+                                </IconButton>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+            </TableBody>
+        </Table>
+    );
+};
+
+const Footer: React.FC = () => {
+    return (
+        <Box display="flex" justifyContent="space-around" mt={1.5}>
+            <Button href="/plant" variant="contained" startIcon={<AddIcon />}>
+                Add Plant
+            </Button>
+        </Box>
+    );
+};
 
 export default Layout;

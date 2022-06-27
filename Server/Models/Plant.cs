@@ -1,4 +1,6 @@
-﻿namespace Server.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Server.Models
 {
     public class Plant
     {
@@ -17,5 +19,6 @@
         public string GrowMedium { get; set; }
         public string Status { get; set; }
         public string? TerminationReason { get; set; }
+        public int? Age { get; set; }
     }
 }
