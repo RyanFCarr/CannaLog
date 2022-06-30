@@ -1,15 +1,7 @@
-import { Add as AddIcon } from "@mui/icons-material";
-import {
-    Box,
-    Button,
-    Container,
-    Divider,
-    Paper,
-    Typography,
-} from "@mui/material";
-import React, { FunctionComponent, ReactElement, useState } from "react";
+import { Box, Divider, Paper, Typography } from "@mui/material";
+import React, { FunctionComponent, useState } from "react";
 import { Outlet, useOutletContext } from "react-router-dom";
-import NavBar from "./NavBar";
+import NavBar from "../custom/NavBar";
 
 type ContextType = {
     setPageTitle(title: string): React.Dispatch<React.SetStateAction<string>>;
@@ -30,7 +22,7 @@ const App: React.FC = () => {
             <NavBar />
             <Paper
                 sx={{
-                    my: 3,
+                    my: 1,
                     mx: "auto",
                     minHeight: "700px",
                     width: "80vw",
@@ -42,14 +34,13 @@ const App: React.FC = () => {
             >
                 <Typography
                     variant="h3"
-                    sx={{ pt: 1 }}
+                    sx={{ mt: 1 }}
                     textAlign="center"
-                    minHeight="80px"
+                    minHeight="70px"
                 >
                     {pageTitle}
-
-                    <Divider />
                 </Typography>
+                <Divider />
                 <Box
                     sx={{
                         display: "flex",
@@ -60,8 +51,7 @@ const App: React.FC = () => {
                 >
                     <Paper
                         sx={{
-                            mt: 2,
-                            mx: 2,
+                            m: 2,
                             width: "auto",
                             backgroundColor: "foreground.default",
                         }}
@@ -92,6 +82,17 @@ export function useAppContext() {
     return useOutletContext<ContextType>();
 }
 
+/**
+ * Several issues with how we handle this footer, but it works.
+ * We cannot style it directly from the App level, we can style
+ * the components around it and we can style it on the child component.
+ * This makes generic styling for all footers a little difficult.
+ * The Fragment it is in is required.
+ * Vertical centering is the ideal, but I can't find a way to do it.
+ * Got close, but applying flex:1 to a parent element to make it grow to fill
+ * makes the button grow as well. Which is dumb since the flex property is on the parent, not the button.
+ * Currently using different margins on the child componenets to get close enough to centered.
+ */
 const DefaultFooter: React.FC = () => {
     return <></>;
 };

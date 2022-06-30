@@ -16,10 +16,10 @@ import {
 import { Add as AddIcon } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
-import { useEffectOnce } from "../../hooks/useEffectOnce";
-import Plant from "../../models/Plant";
-import { toShortDate, trimToUndefined } from "../../util/functions";
-import GrowLogList from "../Logs/GrowLogList";
+import { useEffectOnce } from "../../../hooks/useEffectOnce";
+import Plant from "../../../models/Plant";
+import { toShortDate, trimToUndefined } from "../../../util/functions";
+import GrowLogList from "../GrowLogs/GrowLogList";
 import { useAppContext } from "../App";
 
 //#region Enums
@@ -255,7 +255,7 @@ const PlantDetail: React.FC = () => {
                         variant="contained"
                         startIcon={<AddIcon />}
                         onClick={() =>
-                            navigate(`/plants/${editModePlant.id}/growLog`)
+                            navigate(`/plants/${plantId}/growlogs/add`)
                         }
                     >
                         Add a Grow Log

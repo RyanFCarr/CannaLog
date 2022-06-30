@@ -1,5 +1,4 @@
-import { Box, Divider, Typography } from "@mui/material";
-import { useEffectOnce } from "../hooks/useEffectOnce";
+import { useEffectOnce } from "../../hooks/useEffectOnce";
 import { useAppContext } from "./App";
 
 const Layout: React.FC = () => {

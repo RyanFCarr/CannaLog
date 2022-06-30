@@ -5,19 +5,17 @@ import {
 import {
     Box,
     Button,
-    Paper,
     Table,
     TableBody,
-    TableContainer,
     TableHead,
     TableRow,
 } from "@mui/material";
-import TableCell from "../Themed/ThemedTableCell";
-import IconButton from "../Themed/ThemedIconButton";
+import TableCell from "../../custom/Themed/ThemedTableCell";
+import IconButton from "../../custom/Themed/ThemedIconButton";
 import { useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { useEffectOnce } from "../../hooks/useEffectOnce";
-import Plant from "../../models/Plant";
+import { useEffectOnce } from "../../../hooks/useEffectOnce";
+import Plant from "../../../models/Plant";
 import { useAppContext } from "../App";
 import PlantDetail from "./PlantDetail";
 
