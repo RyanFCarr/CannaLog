@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
 import GrowLog from "../../../models/GrowLog";
 import { toShortDate } from "../../../util/functions";
-import { useAppContext } from "../App";
+import BasePage from "../BasePage";
 import MultiSelectChip from "../../custom/MultiSelectChip";
 import NutrientStepper from "../../custom/NutrientStepper";
 import { AdditiveDto } from "../../../models/Additive";
@@ -14,13 +14,13 @@ enum ViewMode {
     VIEW = "View",
     ADD = "Add",
     EDIT = "Edit",
-}
+};
 
 enum TextVariants {
     FILLED = "filled",
     STANDARD = "standard",
     OUTLINED = "outlined",
-}
+};
 
 const Additives: AdditiveDto[] = [
     { id: 1, brand: "General Hydroponics", name: "Micro" },
@@ -28,16 +28,55 @@ const Additives: AdditiveDto[] = [
     { id: 3, brand: "General Hydroponics", name: "CaliMag" },
 ];
 
-const GrowLogDetail: React.FC = () => {
+const Layout: React.FC = () => {
     const { plantId, growLogId } = useParams();
 
-    const [viewMode, setViewMode] = useState<string>(
+    const [viewMode, setViewMode] = useState<ViewMode>(
         growLogId ? ViewMode.VIEW : ViewMode.ADD
     );
     const [editModeLog, setEditModeLog] = useState<GrowLog>(new GrowLog());
     const [OGLog, setOGLog] = useState<GrowLog>(new GrowLog());
-    const { setPageTitle, setFooter } = useAppContext();
+    const [title, setTitle] = useState<string>(`${viewMode} Grow Log`);
 
+    useEffect(() => {
+        setTitle(`${viewMode} Grow Log`);
+    }, [viewMode]);
+
+    return <BasePage
+        title={title}
+        Body={<GrowLogDetail
+            plantId={plantId}
+            growLogId={growLogId}
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            editModeLog={editModeLog}
+            setEditModeLog={setEditModeLog}
+            OGLog={OGLog}
+            setOGLog={setOGLog}
+        />}
+        Footer={<Footer
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            plantId={plantId}
+            editModeLog={editModeLog}
+            setEditModeLog={setEditModeLog}
+            OGLog={OGLog}
+        />}
+    />
+}
+
+interface GrowLogDetailProps {
+    plantId: string | undefined;
+    growLogId: string | undefined;
+    viewMode: ViewMode;
+    setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+    editModeLog: GrowLog;
+    setEditModeLog: React.Dispatch<React.SetStateAction<GrowLog>>;
+    OGLog: GrowLog;
+    setOGLog: React.Dispatch<React.SetStateAction<GrowLog>>;
+}
+
+const GrowLogDetail: React.FC<GrowLogDetailProps> = ({ plantId, growLogId, viewMode, setViewMode, editModeLog, setEditModeLog, OGLog, setOGLog }: GrowLogDetailProps) => {
     useEffectOnce(() => {
         const getGrowLog = async () => {
             if (!growLogId) return;
@@ -56,81 +95,14 @@ const GrowLogDetail: React.FC = () => {
                 console.log(JSON.stringify(e));
             }
         };
-        setPageTitle(`${viewMode} Grow Log`);
-        setFooter(Footer);
         getGrowLog();
     }, []);
-
-    useEffect(() => {
-        setPageTitle(`${viewMode} Grow Log`);
-        setFooter(Footer);
-    }, [viewMode]);
 
     const setTags = (tags: string[]) => {
         setEditModeLog({
             ...editModeLog,
             tags: tags.join(","),
         });
-    };
-
-    const add = async () => {
-        try {
-            // const res = await fetch("https://localhost:7247/GrowLog", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify(editModeLog),
-            // });
-
-            // if (!res.ok) {
-            //     console.log(res.status, res.statusText);
-            // } else {
-            //     const data: GrowLog = await res.json();
-            //     navigate(`/plants/${plantId}/growlogs/${data.id}`);
-            // }
-            console.table(editModeLog);
-        } catch (e: any) {
-            console.log(JSON.stringify(e));
-        }
-    };
-    const update = async () => {
-        // try {
-        //     const res = await fetch(
-        //         `https://localhost:7247/GrowLog/${editModeLog.id}`,
-        //         {
-        //             method: "PUT",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //             },
-        //             body: JSON.stringify(editModeLog),
-        //         }
-        //     );
-        //     if (!res.ok) {
-        //         console.log(res.status, res.statusText);
-        //     } else {
-        //         const data: GrowLog = await res.json();
-        //         navigate(`/plants/${plantId}/growlogs/${data.id}`);
-        //     }
-        // } catch (e: any) {
-        //     console.log(JSON.stringify(e));
-        // }
-        console.table(editModeLog);
-    };
-    const handleSubmit = () => {
-        if (viewMode === ViewMode.VIEW) {
-            setViewMode(ViewMode.EDIT);
-        } else if (viewMode === ViewMode.ADD) {
-            add();
-            setViewMode(ViewMode.VIEW);
-        } else {
-            update();
-            setViewMode(ViewMode.VIEW);
-        }
-    };
-    const handleEditDiscard = () => {
-        setViewMode(ViewMode.VIEW);
-        setEditModeLog(OGLog);
     };
 
     let textFieldProps: {
@@ -163,54 +135,6 @@ const GrowLogDetail: React.FC = () => {
             InputLabelProps: { shrink: true },
         };
     }
-
-    const Footer: React.FC = () => {
-        return (
-            <Box
-                display="flex"
-                justifyContent="space-around"
-                sx={{ mt: 1.5, mb: 2 }}
-            >
-                {viewMode === ViewMode.ADD && (
-                    <Button
-                        variant="contained"
-                        color="error"
-                        href={`/plants/${plantId}/growlogs`}
-                    >
-                        Discard
-                    </Button>
-                )}
-                {viewMode === ViewMode.EDIT && (
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={handleEditDiscard}
-                    >
-                        Discard
-                    </Button>
-                )}
-
-                <Button
-                    variant="contained"
-                    color="success"
-                    onClick={handleSubmit}
-                >
-                    {viewMode === ViewMode.VIEW ? "Edit" : "Save"}
-                </Button>
-                {(viewMode === ViewMode.EDIT || viewMode === ViewMode.ADD) && (
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() => {
-                            // Open Nutrient Stepper
-                        }}
-                    >
-                        Add Additives
-                    </Button>
-                )}
-            </Box>
-        );
-    };
 
     return (
         <Box
@@ -415,4 +339,122 @@ const GrowLogDetail: React.FC = () => {
     );
 };
 
-export default GrowLogDetail;
+interface GrowLogDetailFooterProps {
+    viewMode: ViewMode;
+    setViewMode: React.Dispatch<React.SetStateAction<ViewMode>>;
+    plantId: string | undefined;
+    editModeLog: GrowLog;
+    setEditModeLog: React.Dispatch<React.SetStateAction<GrowLog>>;
+    OGLog: GrowLog;
+}
+
+const Footer: React.FC<GrowLogDetailFooterProps> = ({ viewMode, setViewMode, plantId, editModeLog, setEditModeLog, OGLog }: GrowLogDetailFooterProps) => {
+
+
+    const add = async () => {
+        try {
+            // const res = await fetch("https://localhost:7247/GrowLog", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //     },
+            //     body: JSON.stringify(editModeLog),
+            // });
+
+            // if (!res.ok) {
+            //     console.log(res.status, res.statusText);
+            // } else {
+            //     const data: GrowLog = await res.json();
+            //     navigate(`/plants/${plantId}/growlogs/${data.id}`);
+            // }
+            console.table(editModeLog);
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
+        }
+    };
+    const update = async () => {
+        // try {
+        //     const res = await fetch(
+        //         `https://localhost:7247/GrowLog/${editModeLog.id}`,
+        //         {
+        //             method: "PUT",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //             },
+        //             body: JSON.stringify(editModeLog),
+        //         }
+        //     );
+        //     if (!res.ok) {
+        //         console.log(res.status, res.statusText);
+        //     } else {
+        //         const data: GrowLog = await res.json();
+        //         navigate(`/plants/${plantId}/growlogs/${data.id}`);
+        //     }
+        // } catch (e: any) {
+        //     console.log(JSON.stringify(e));
+        // }
+        console.table(editModeLog);
+    };
+    const handleSubmit = () => {
+        if (viewMode === ViewMode.VIEW) {
+            setViewMode(ViewMode.EDIT);
+        } else if (viewMode === ViewMode.ADD) {
+            add();
+            setViewMode(ViewMode.VIEW);
+        } else {
+            update();
+            setViewMode(ViewMode.VIEW);
+        }
+    };
+    const handleEditDiscard = () => {
+        setViewMode(ViewMode.VIEW);
+        setEditModeLog(OGLog);
+    };
+    return (
+        <Box
+            display="flex"
+            justifyContent="space-around"
+            sx={{ mt: 1.5, mb: 2 }}
+        >
+            {viewMode === ViewMode.ADD && (
+                <Button
+                    variant="contained"
+                    color="error"
+                    href={`/plants/${plantId}/growlogs`}
+                >
+                    Discard
+                </Button>
+            )}
+            {viewMode === ViewMode.EDIT && (
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleEditDiscard}
+                >
+                    Discard
+                </Button>
+            )}
+
+            <Button
+                variant="contained"
+                color="success"
+                onClick={handleSubmit}
+            >
+                {viewMode === ViewMode.VIEW ? "Edit" : "Save"}
+            </Button>
+            {(viewMode === ViewMode.EDIT || viewMode === ViewMode.ADD) && (
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                        // Open Nutrient Stepper
+                    }}
+                >
+                    Add Additives
+                </Button>
+            )}
+        </Box>
+    );
+};
+
+export default Layout;

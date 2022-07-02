@@ -16,15 +16,15 @@ import { useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
 import Plant from "../../../models/Plant";
-import { useAppContext } from "../App";
+import BasePage from "../BasePage";
 import PlantDetail from "./PlantDetail";
 
 const Layout: React.FC = () => {
     return (
         <>
             <Routes>
-                <Route index element={<PlantList />} />
-                <Route path="add" element={<PlantDetail />} />
+                <Route index element={<BasePage title="Plant List" Body={<PlantList />} Footer={<Footer />} />} />
+                <Route path="add/*" element={<PlantDetail />} />
                 <Route path=":plantId/*" element={<PlantDetail />} />
             </Routes>
         </>
@@ -34,8 +34,6 @@ const Layout: React.FC = () => {
 const PlantList: React.FC = () => {
     const [plants, setPlants] = useState<Plant[]>();
     const navigate = useNavigate();
-    const { setPageTitle, setFooter } = useAppContext();
-    const pageTitle = "Plant List";
 
     useEffectOnce(() => {
         const getPlants = async () => {
@@ -50,8 +48,6 @@ const PlantList: React.FC = () => {
                 console.log(JSON.stringify(e));
             }
         };
-        setPageTitle(pageTitle);
-        setFooter(Footer);
         getPlants();
     }, []);
 
@@ -61,7 +57,6 @@ const PlantList: React.FC = () => {
                 <TableRow>
                     <TableCell>Name</TableCell>
                     <TableCell>Strain</TableCell>
-                    {/* <TableCell>Age</TableCell> */}
                     <TableCell>Status</TableCell>
                     <TableCell></TableCell>
                 </TableRow>
@@ -88,18 +83,6 @@ const PlantList: React.FC = () => {
                                 {plant.name}
                             </TableCell>
                             <TableCell>{plant.strain}</TableCell>
-                            {/* <TableCell>
-                                        {plant.transplantDate
-                                            ? `${differenceInDays(
-                                                  plant.harvestDate
-                                                      ? parseISO(
-                                                            plant.harvestDate
-                                                        )
-                                                      : new Date(),
-                                                  parseISO(plant.transplantDate)
-                                              ).toString()} days`
-                                            : ""}
-                                    </TableCell> */}
                             <TableCell>{plant.status}</TableCell>
                             <TableCell>
                                 <IconButton
@@ -120,7 +103,7 @@ const PlantList: React.FC = () => {
 const Footer: React.FC = () => {
     return (
         <Box display="flex" justifyContent="space-around" mt={1.5}>
-            <Button href="/plant" variant="contained" startIcon={<AddIcon />}>
+            <Button href="/plants/add" variant="contained" startIcon={<AddIcon />}>
                 Add Plant
             </Button>
         </Box>

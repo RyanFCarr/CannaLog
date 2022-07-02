@@ -1,17 +1,8 @@
-import { useEffectOnce } from "../../hooks/useEffectOnce";
-import { useAppContext } from "./App";
-
 const Layout: React.FC = () => {
     return <Home />;
 };
 
 const Home: React.FC = () => {
-    const { setPageTitle, setFooter } = useAppContext();
-
-    useEffectOnce(() => {
-        setPageTitle("Welcome User");
-    }, []);
-
     return <>Home</>;
 };
 

@@ -26,22 +26,22 @@ builder.Services.AddSwaggerGen();
 var allowedOriginsPolicy = "allowedOriginsPolicy";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: allowedOriginsPolicy,
-                      policy =>
-                      {
-                          policy.WithOrigins("http://localhost:3000")
-                            .AllowAnyHeader()
-                            .AllowAnyMethod();
-                      });
+  options.AddPolicy(name: allowedOriginsPolicy,
+                    policy =>
+                    {
+                      policy.WithOrigins("http://localhost:3000")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                    });
 });
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Local"))
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

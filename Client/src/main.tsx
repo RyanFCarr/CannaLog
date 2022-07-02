@@ -2,7 +2,7 @@ import { createTheme, CssBaseline, ThemeProvider } from "@mui/material";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import App from "./components/pages/App";
+import BasePage from "./components/pages/BasePage";
 import Home from "./components/pages/Home";
 import PlantList from "./components/pages/Plants/PlantList";
 import "./index.css";
@@ -33,10 +33,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <React.StrictMode>
             <BrowserRouter>
                 <Routes>
-                    <Route path="*" element={<App />}>
-                        <Route path="/*" element={<Home />} />
-                        <Route path="plants/*" element={<PlantList />} />
-                    </Route>
+                    <Route index element={<BasePage title="Welcome" Body={<Home />} Footer={<></>} />} />
+                    <Route path="plants/*" element={<PlantList />} />
                 </Routes>
             </BrowserRouter>
         </React.StrictMode>

@@ -17,14 +17,15 @@ import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
 import GrowLog from "../../../models/GrowLog";
 import { toShortDate } from "../../../util/functions";
-import { useAppContext } from "../App";
+import BasePage from "../BasePage";
 import GrowLogDetail from "./GrowLogDetail";
 
 const Layout: React.FC = () => {
+    const { plantId } = useParams();
     return (
         <>
             <Routes>
-                <Route index element={<GrowLogList />} />
+                <Route index element={<BasePage title="Grow Log List" Body={<GrowLogList plantId={plantId} />} Footer={<Footer plantId={plantId} />} />} />
                 <Route path="add" element={<GrowLogDetail />} />
                 <Route path=":growLogId" element={<GrowLogDetail />} />
             </Routes>
@@ -32,12 +33,13 @@ const Layout: React.FC = () => {
     );
 };
 
-const GrowLogList: React.FC = () => {
-    const { plantId } = useParams();
+interface GrowLogListProps {
+    plantId: string | undefined;
+}
+
+const GrowLogList: React.FC<GrowLogListProps> = ({ plantId }: GrowLogListProps) => {
     const [growLogs, setGrowLogs] = useState<GrowLog[]>();
     const navigate = useNavigate();
-    const { setPageTitle, setFooter } = useAppContext();
-    const pageTitle = "Grow Log List";
 
     useEffectOnce(() => {
         const getGrowLogs = async () => {
@@ -52,24 +54,8 @@ const GrowLogList: React.FC = () => {
                 console.log(JSON.stringify(e));
             }
         };
-        setPageTitle(pageTitle);
-        setFooter(Footer);
         getGrowLogs();
     }, []);
-
-    const Footer: React.FC = () => {
-        return (
-            <Box display="flex" justifyContent="space-around" mt={1.5}>
-                <Button
-                    href={`/plants/${plantId}/growlogs/add`}
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                >
-                    Add Grow Log
-                </Button>
-            </Box>
-        );
-    };
 
     return (
         <Table>
@@ -121,6 +107,24 @@ const GrowLogList: React.FC = () => {
                     ))}
             </TableBody>
         </Table>
+    );
+};
+
+interface GrowLogListFooterProps {
+    plantId: string | undefined;
+}
+
+const Footer: React.FC<GrowLogListFooterProps> = ({ plantId }: GrowLogListFooterProps) => {
+    return (
+        <Box display="flex" justifyContent="space-around" mt={1.5}>
+            <Button
+                href={`/plants/${plantId}/growlogs/add`}
+                variant="contained"
+                startIcon={<AddIcon />}
+            >
+                Add Grow Log
+            </Button>
+        </Box>
     );
 };
 

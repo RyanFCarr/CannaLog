@@ -20,7 +20,7 @@ import { useEffectOnce } from "../../../hooks/useEffectOnce";
 import Plant from "../../../models/Plant";
 import { toShortDate, trimToUndefined } from "../../../util/functions";
 import GrowLogList from "../GrowLogs/GrowLogList";
-import { useAppContext } from "../App";
+import BasePage from "../BasePage";
 
 //#region Enums
 enum ViewMode {
@@ -40,32 +40,76 @@ const autoFlowerSched = ["(18/6)", "(20/4)"];
 const photoperiodSched = ["Veg (18/6)", "Bloom (12/12)"];
 
 const Layout: React.FC = () => {
+    const { plantId } = useParams();
+    const [viewMode, setViewMode] = useState<string>(
+        plantId ? ViewMode.VIEW : ViewMode.ADD
+    );
+    const [title, setTitle] = useState<string>(`${viewMode} Plant`);
+    const [editModePlant, setEditModePlant] = useState<Plant>(new Plant());
+    const [OGPlant, setOGPlant] = useState<Plant>(new Plant());
+    const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([
+        "",
+    ]);
+
+    const setDefaultLightingSchedule = (plant: Plant) => {
+        if (plant.growType === "Autoflower")
+            setLightingSchedOptions(autoFlowerSched);
+        if (plant.growType === "Photoperiod")
+            setLightingSchedOptions(photoperiodSched);
+    };
+
+    useEffect(() => {
+        setTitle(`${viewMode} Plant`);
+    }, [viewMode]);
+
     return (
         <>
             <Routes>
-                <Route index element={<PlantDetail />} />
+                <Route index element={
+                    <BasePage
+                        title={title}
+                        Body={<PlantDetail
+                            plantId={plantId}
+                            viewMode={viewMode}
+                            editModePlant={editModePlant}
+                            setEditModePlant={setEditModePlant}
+                            setOGPlant={setOGPlant}
+                            setDefaultLightingSchedule={setDefaultLightingSchedule}
+                            lightingSchedOptions={lightingSchedOptions}
+                            setLightingSchedOptions={setLightingSchedOptions}
+                        />}
+                        Footer={<Footer
+                            plantId={plantId}
+                            viewMode={viewMode}
+                            setViewMode={setViewMode}
+                            editModePlant={editModePlant}
+                            setEditModePlant={setEditModePlant}
+                            OGPlant={OGPlant}
+                            setDefaultLightingSchedule={setDefaultLightingSchedule}
+                        />}
+                    />}
+                />
                 <Route path="growLogs/*" element={<GrowLogList />} />
             </Routes>
         </>
     );
 };
 
-const PlantDetail: React.FC = () => {
-    const { plantId } = useParams();
-    const navigate = useNavigate();
+interface PlantDetailProps {
+    viewMode: string;
+    plantId: string | undefined;
+    editModePlant: Plant;
+    setEditModePlant: React.Dispatch<React.SetStateAction<Plant>>;
+    setOGPlant: React.Dispatch<React.SetStateAction<Plant>>;
+    setDefaultLightingSchedule: (plant: Plant) => void;
+    lightingSchedOptions: string[];
+    setLightingSchedOptions: React.Dispatch<React.SetStateAction<string[]>>;
+}
 
+const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePlant, setEditModePlant, setOGPlant, setDefaultLightingSchedule, lightingSchedOptions, setLightingSchedOptions }: PlantDetailProps) => {
     // #region State
-    const [viewMode, setViewMode] = useState<string>(
-        plantId ? ViewMode.VIEW : ViewMode.ADD
-    );
-    const [editModePlant, setEditModePlant] = useState<Plant>(new Plant());
-    const [OGPlant, setOGPlant] = useState<Plant>(new Plant());
     const [open, toggleOpen] = useState(false);
     const [addNutesDialog, setAddNutesDialog] = useState<string>();
-    const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([
-        "",
-    ]);
-    const { setPageTitle, setFooter } = useAppContext();
     // #endregion
     // #region Dialog methods
     const handleClose = () => {
@@ -81,82 +125,6 @@ const PlantDetail: React.FC = () => {
         handleClose();
     };
     // #endregion
-
-    const add = async () => {
-        try {
-            validateForm();
-            const res = await fetch("https://localhost:7247/Plant", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(editModePlant),
-            });
-
-            if (!res.ok) {
-                console.log(res.status, res.statusText);
-            } else {
-                const data: Plant = await res.json();
-                navigate(`/plants?id=${data.id}`);
-            }
-        } catch (e: any) {
-            console.log(JSON.stringify(e));
-        }
-    };
-    const update = async () => {
-        try {
-            validateForm();
-            const res = await fetch(
-                `https://localhost:7247/Plant/${editModePlant.id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(editModePlant),
-                }
-            );
-            if (!res.ok) {
-                console.log(res.status, res.statusText);
-            } else {
-                const data: Plant = await res.json();
-                navigate(`/plants?id=${data.id}`);
-            }
-        } catch (e: any) {
-            console.log(JSON.stringify(e));
-        }
-    };
-    const handleSubmit = () => {
-        if (viewMode === ViewMode.VIEW) {
-            setViewMode(ViewMode.EDIT);
-        } else if (viewMode === ViewMode.ADD) {
-            add();
-            setViewMode(ViewMode.VIEW);
-        } else {
-            update();
-            setViewMode(ViewMode.VIEW);
-        }
-    };
-    const handleEditDiscard = () => {
-        setViewMode(ViewMode.VIEW);
-        setEditModePlant(OGPlant);
-        setDefaultLightingSchedule(OGPlant);
-    };
-    const setDefaultLightingSchedule = (plant: Plant) => {
-        if (plant.growType === "Autoflower")
-            setLightingSchedOptions(autoFlowerSched);
-        if (plant.growType === "Photoperiod")
-            setLightingSchedOptions(photoperiodSched);
-    };
-    const validateForm = () => {
-        setEditModePlant({
-            ...editModePlant,
-            name: trimToUndefined(editModePlant.name),
-            strain: trimToUndefined(editModePlant.strain),
-            breeder: trimToUndefined(editModePlant.breeder),
-            terminationReason: trimToUndefined(editModePlant.terminationReason),
-        });
-    };
 
     useEffectOnce(() => {
         const getPlant = async () => {
@@ -179,11 +147,6 @@ const PlantDetail: React.FC = () => {
         };
         getPlant();
     }, []);
-
-    useEffect(() => {
-        setPageTitle(`${viewMode} Plant`);
-        setFooter(Footer);
-    }, [viewMode]);
 
     let textFieldProps: {
         variant?: TextVariants;
@@ -224,46 +187,6 @@ const PlantDetail: React.FC = () => {
             variant: TextVariants.OUTLINED,
         };
     }
-
-    const Footer: React.FC = () => {
-        return (
-            <Box display="flex" justifyContent="space-around">
-                {viewMode === ViewMode.ADD && (
-                    <Button variant="contained" color="error" href="/plants">
-                        Discard
-                    </Button>
-                )}
-                {viewMode === ViewMode.EDIT && (
-                    <Button
-                        variant="contained"
-                        color="error"
-                        onClick={handleEditDiscard}
-                    >
-                        Discard
-                    </Button>
-                )}
-
-                <Button
-                    variant="contained"
-                    color="success"
-                    onClick={handleSubmit}
-                >
-                    {viewMode === ViewMode.VIEW ? "Edit" : "Save"}
-                </Button>
-                {viewMode === ViewMode.VIEW && (
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={() =>
-                            navigate(`/plants/${plantId}/growlogs/add`)
-                        }
-                    >
-                        Add a Grow Log
-                    </Button>
-                )}
-            </Box>
-        );
-    };
 
     return (
         <Box
@@ -575,6 +498,128 @@ const PlantDetail: React.FC = () => {
                     </DialogActions>
                 </form>
             </Dialog>
+        </Box>
+    );
+};
+
+interface PlantDetailFooterProps {
+    viewMode: string;
+    setViewMode: React.Dispatch<React.SetStateAction<string>>;
+    plantId: string | undefined;
+    editModePlant: Plant;
+    setEditModePlant: React.Dispatch<React.SetStateAction<Plant>>;
+    OGPlant: Plant;
+    setDefaultLightingSchedule: (plant: Plant) => void;
+}
+const Footer: React.FC<PlantDetailFooterProps> = ({ plantId, viewMode, setViewMode, editModePlant, setEditModePlant, OGPlant, setDefaultLightingSchedule }: PlantDetailFooterProps) => {
+    const navigate = useNavigate();
+
+    const validateForm = () => {
+        setEditModePlant({
+            ...editModePlant,
+            name: trimToUndefined(editModePlant.name),
+            strain: trimToUndefined(editModePlant.strain),
+            breeder: trimToUndefined(editModePlant.breeder),
+            terminationReason: trimToUndefined(editModePlant.terminationReason),
+        });
+    };
+
+    const add = async () => {
+        try {
+            validateForm();
+            const res = await fetch("https://localhost:7247/Plant", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(editModePlant),
+            });
+
+            if (!res.ok) {
+                console.log(res.status, res.statusText);
+            } else {
+                const data: Plant = await res.json();
+                navigate(`/plants/${data.id}`);
+            }
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
+        }
+    };
+    const update = async () => {
+        try {
+            validateForm();
+            const res = await fetch(
+                `https://localhost:7247/Plant/${editModePlant.id}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(editModePlant),
+                }
+            );
+            if (!res.ok) {
+                console.log(res.status, res.statusText);
+            } else {
+                const data: Plant = await res.json();
+                navigate(`/plants/${data.id}`);
+            }
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
+        }
+    };
+    const handleSubmit = () => {
+        if (viewMode === ViewMode.VIEW) {
+            setViewMode(ViewMode.EDIT);
+        } else if (viewMode === ViewMode.ADD) {
+            add();
+            setViewMode(ViewMode.VIEW);
+        } else {
+            update();
+            setViewMode(ViewMode.VIEW);
+        }
+    };
+    const handleEditDiscard = () => {
+        setViewMode(ViewMode.VIEW);
+        setEditModePlant(OGPlant);
+        setDefaultLightingSchedule(OGPlant);
+    };
+
+    return (
+        <Box display="flex" justifyContent="space-around">
+            {viewMode === ViewMode.ADD && (
+                <Button variant="contained" color="error" href="/plants">
+                    Discard
+                </Button>
+            )}
+            {viewMode === ViewMode.EDIT && (
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleEditDiscard}
+                >
+                    Discard
+                </Button>
+            )}
+
+            <Button
+                variant="contained"
+                color="success"
+                onClick={handleSubmit}
+            >
+                {viewMode === ViewMode.VIEW ? "Edit" : "Save"}
+            </Button>
+            {viewMode === ViewMode.VIEW && (
+                <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() =>
+                        navigate(`/plants/${plantId}/growlogs/add`)
+                    }
+                >
+                    Add a Grow Log
+                </Button>
+            )}
         </Box>
     );
 };
