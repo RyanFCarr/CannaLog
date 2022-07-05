@@ -256,7 +256,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                         });
                     }
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus
@@ -288,7 +288,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                         setLightingSchedOptions([""]);
                     }
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus
@@ -313,7 +313,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                         lightingType: newValue || undefined,
                     });
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus
@@ -343,7 +343,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                         lightingSchedule: newValue || undefined,
                     });
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus
@@ -368,7 +368,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                         growMedium: newValue || undefined,
                     });
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus
@@ -451,7 +451,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
                                 : editModePlant.terminationReason,
                     });
                 }}
-                onInputChange={(event, newInputValue) => {
+                onInputChange={() => {
                     // Required for the Autocomplete to be considered "controlled"
                 }}
                 selectOnFocus

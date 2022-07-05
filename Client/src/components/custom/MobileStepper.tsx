@@ -7,18 +7,15 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import CloseIcon from '@mui/icons-material/Close';
 
 interface MobileStepperProps {
-    // steps: {
-    //     label: string;
-    //     props: { initialPPM: number };
-    //     layout: React.FC<{ initialPPM: number }>;
-    // }[];
     label: string;
     maxSteps: number;
     activeStep: number;
     setActiveStep: React.Dispatch<React.SetStateAction<number>>;
     children: React.ReactNode;
+    handleClose: () => void;
 }
 
 const MobileStepper: React.FC<MobileStepperProps> = ({
@@ -27,6 +24,7 @@ const MobileStepper: React.FC<MobileStepperProps> = ({
     activeStep,
     setActiveStep,
     children,
+    handleClose,
 }: MobileStepperProps) => {
     const theme = useTheme();
 
@@ -46,15 +44,20 @@ const MobileStepper: React.FC<MobileStepperProps> = ({
                 sx={{
                     display: "flex",
                     alignItems: "center",
+                    justifyContent: "space-between",
                     height: 50,
-                    pl: 2,
+                    px: 2,
                     bgcolor: "background.default",
+                    color: "text.onDefault"
                 }}
             >
+                <div></div>
                 <Typography>{label}</Typography>
+                <CloseIcon onClick={handleClose} />
             </Paper>
             <Box sx={{ maxWidth: 400, width: "100%", p: 2 }}>{children}</Box>
             <Stepper
+                sx={{ color: "text.onDefault" }}
                 variant="text"
                 steps={maxSteps}
                 position="static"
