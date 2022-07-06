@@ -1,4 +1,5 @@
-﻿namespace Server.Models
+﻿#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+namespace Server.Models
 {
     public class GrowLog
     {
@@ -19,5 +20,4 @@
         public string? Tags { get; set; }
     }
 }
-
-// Initial PH, Initial PPM, (Add Nutes, Check PPM), (Check PH, (Optional) PH Adjust)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

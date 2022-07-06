@@ -40,7 +40,9 @@ namespace Server.Repositories
             _context.Update(growLog);
             _context.SaveChanges();
 
+#pragma warning disable CS8603 // Possible null reference return.
             return GetOne(growLog.Id);
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }
