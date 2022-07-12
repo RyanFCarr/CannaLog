@@ -6,9 +6,9 @@ namespace Server.Repositories
     public interface IGrowLogRepository : IRepository<GrowLog> { }
     public class GrowLogRepository : IGrowLogRepository
     {
-        private readonly GrowLogContext _context;
+        private readonly CannaLogContext _context;
 
-        public GrowLogRepository(GrowLogContext context)
+        public GrowLogRepository(CannaLogContext context)
         {
             _context = context;
         }

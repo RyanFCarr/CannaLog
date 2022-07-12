@@ -17,10 +17,11 @@ import { Add as AddIcon } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import { Route, Routes, useNavigate, useParams } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
-import Plant from "../../../models/Plant";
+import Plant, { PlantDto, PlantSaveDto } from "../../../models/Plant";
 import { toShortDate, trimToUndefined } from "../../../util/functions";
 import GrowLogList from "../GrowLogs/GrowLogList";
 import BasePage from "../BasePage";
+import { get, post, put } from "../../../util/functions";
 
 //#region Enums
 enum ViewMode {
@@ -47,15 +48,15 @@ const Layout: React.FC = () => {
     const [title, setTitle] = useState<string>(`${viewMode} Plant`);
     const [editModePlant, setEditModePlant] = useState<Plant>(new Plant());
     const [OGPlant, setOGPlant] = useState<Plant>(new Plant());
-    const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([
-        "",
-    ]);
+    const [lightingSchedOptions, setLightingSchedOptions] = useState<string[]>([""]);
 
-    const setDefaultLightingSchedule = (plant: Plant) => {
-        if (plant.growType === "Autoflower")
+    const setDefaultLightingSchedule = (growType?: string) => {
+        if (growType === "Autoflower")
             setLightingSchedOptions(autoFlowerSched);
-        if (plant.growType === "Photoperiod")
+        else if (growType === "Photoperiod")
             setLightingSchedOptions(photoperiodSched);
+        else
+            setLightingSchedOptions([""]);
     };
 
     useEffect(() => {
@@ -101,7 +102,7 @@ interface PlantDetailProps {
     editModePlant: Plant;
     setEditModePlant: React.Dispatch<React.SetStateAction<Plant>>;
     setOGPlant: React.Dispatch<React.SetStateAction<Plant>>;
-    setDefaultLightingSchedule: (plant: Plant) => void;
+    setDefaultLightingSchedule: (growType?: string) => void;
     lightingSchedOptions: string[];
     setLightingSchedOptions: React.Dispatch<React.SetStateAction<string[]>>;
 }
@@ -130,16 +131,15 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plantId, viewMode, editModePl
         const getPlant = async () => {
             if (!plantId) return;
             try {
-                const res = await fetch(
+                const res = await get<PlantDto>(
                     `https://localhost:7247/Plant/${plantId}`
                 );
-                if (!res.ok) {
-                    console.log(res.status, res.statusText);
-                } else {
-                    const plant: Plant = await res.json();
+                //TODO: HTTP code handling e.g.: 404
+                if (res.parsedBody) {
+                    const plant: Plant = Plant.fromDTO(res.parsedBody);
                     setEditModePlant(plant);
                     setOGPlant(plant);
-                    setDefaultLightingSchedule(plant);
+                    setDefaultLightingSchedule(plant.growType);
                 }
             } catch (e: any) {
                 console.log(JSON.stringify(e));
@@ -509,7 +509,7 @@ interface PlantDetailFooterProps {
     editModePlant: Plant;
     setEditModePlant: React.Dispatch<React.SetStateAction<Plant>>;
     OGPlant: Plant;
-    setDefaultLightingSchedule: (plant: Plant) => void;
+    setDefaultLightingSchedule: (growType?: string) => void;
 }
 const Footer: React.FC<PlantDetailFooterProps> = ({ plantId, viewMode, setViewMode, editModePlant, setEditModePlant, OGPlant, setDefaultLightingSchedule }: PlantDetailFooterProps) => {
     const navigate = useNavigate();
@@ -527,18 +527,10 @@ const Footer: React.FC<PlantDetailFooterProps> = ({ plantId, viewMode, setViewMo
     const add = async () => {
         try {
             validateForm();
-            const res = await fetch("https://localhost:7247/Plant", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(editModePlant),
-            });
+            const res = await post<PlantSaveDto, PlantDto>("https://localhost:7247/Plant", PlantSaveDto.fromView(editModePlant));
 
-            if (!res.ok) {
-                console.log(res.status, res.statusText);
-            } else {
-                const data: Plant = await res.json();
+            if (res.parsedBody) {
+                const data: Plant = Plant.fromDTO(res.parsedBody);
                 navigate(`/plants/${data.id}`);
             }
         } catch (e: any) {
@@ -548,20 +540,10 @@ const Footer: React.FC<PlantDetailFooterProps> = ({ plantId, viewMode, setViewMo
     const update = async () => {
         try {
             validateForm();
-            const res = await fetch(
-                `https://localhost:7247/Plant/${editModePlant.id}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(editModePlant),
-                }
-            );
-            if (!res.ok) {
-                console.log(res.status, res.statusText);
-            } else {
-                const data: Plant = await res.json();
+            const res = await put<PlantSaveDto, PlantDto>(`https://localhost:7247/Plant/${editModePlant.id}`, PlantSaveDto.fromView(editModePlant));
+
+            if (res.parsedBody) {
+                const data: Plant = Plant.fromDTO(res.parsedBody);
                 navigate(`/plants/${data.id}`);
             }
         } catch (e: any) {
@@ -582,7 +564,7 @@ const Footer: React.FC<PlantDetailFooterProps> = ({ plantId, viewMode, setViewMo
     const handleEditDiscard = () => {
         setViewMode(ViewMode.VIEW);
         setEditModePlant(OGPlant);
-        setDefaultLightingSchedule(OGPlant);
+        setDefaultLightingSchedule(OGPlant.growType);
     };
 
     return (

@@ -3,23 +3,21 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Server.Contexts;
 
 #nullable disable
 
-namespace Server.Migrations.GrowLog
+namespace Server.Migrations
 {
-    [DbContext(typeof(GrowLogContext))]
-    [Migration("20220624015958_AddGrowLog")]
-    partial class AddGrowLog
+    [DbContext(typeof(CannaLogContext))]
+    partial class CannaLogContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.5")
+                .HasAnnotation("ProductVersion", "6.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -42,9 +40,50 @@ namespace Server.Migrations.GrowLog
                     b.Property<string>("Tags")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Additive");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Brand = "General Hydroponics",
+                            Name = "Micro",
+                            Type = "NUTES"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Brand = "General Hydroponics",
+                            Name = "Bloom",
+                            Type = "NUTES"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Brand = "General Hydroponics",
+                            Name = "CaliMag",
+                            Type = "NUTES"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Brand = "General Hydroponics",
+                            Name = "PH Up",
+                            Type = "PH"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Brand = "General Hydroponics",
+                            Name = "PH Down",
+                            Type = "PH"
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.AdditiveAdjustment", b =>
@@ -63,6 +102,10 @@ namespace Server.Migrations.GrowLog
 
                     b.Property<int>("InitialPPM")
                         .HasColumnType("int");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -89,9 +132,6 @@ namespace Server.Migrations.GrowLog
                         .HasPrecision(8, 3)
                         .HasColumnType("decimal(8,3)");
 
-                    b.Property<int?>("PHAdjustmentId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UnitofMeasure")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -101,8 +141,6 @@ namespace Server.Migrations.GrowLog
                     b.HasIndex("AdditiveAdjustmentId");
 
                     b.HasIndex("AdditiveId");
-
-                    b.HasIndex("PHAdjustmentId");
 
                     b.ToTable("AdditiveDosage");
                 });
@@ -158,15 +196,20 @@ namespace Server.Migrations.GrowLog
                         .HasPrecision(4, 1)
                         .HasColumnType("decimal(4,1)");
 
+                    b.Property<int>("PlantId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Tags")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlantId");
+
                     b.ToTable("GrowLogs");
                 });
 
-            modelBuilder.Entity("Server.Models.PHAdjustment", b =>
+            modelBuilder.Entity("Server.Models.Plant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -174,22 +217,64 @@ namespace Server.Migrations.GrowLog
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int?>("AdditiveAdjustmentId")
-                        .HasColumnType("int");
+                    b.Property<int?>("Age")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("int")
+                        .HasComputedColumnSql("CASE WHEN TransplantDate IS NULL THEN NULL ELSE DATEDIFF(DAY, TransplantDate, COALESCE(HarvestDate, GETDATE())) END");
 
-                    b.Property<decimal>("FinalPH")
+                    b.Property<string>("BaseNutrientsBrand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Breeder")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GrowMedium")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("GrowType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("HarvestDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsFeminized")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("LightingSchedule")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LightingType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Strain")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TargetPH")
                         .HasPrecision(3, 1)
                         .HasColumnType("decimal(3,1)");
 
-                    b.Property<decimal>("InitialPH")
-                        .HasPrecision(3, 1)
-                        .HasColumnType("decimal(3,1)");
+                    b.Property<string>("TerminationReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("TransplantDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdditiveAdjustmentId");
-
-                    b.ToTable("PHAdjustment");
+                    b.ToTable("Plants");
                 });
 
             modelBuilder.Entity("Server.Models.AdditiveAdjustment", b =>
@@ -211,25 +296,23 @@ namespace Server.Migrations.GrowLog
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Server.Models.PHAdjustment", null)
-                        .WithMany("Dosages")
-                        .HasForeignKey("PHAdjustmentId");
-
                     b.Navigation("Additive");
                 });
 
-            modelBuilder.Entity("Server.Models.PHAdjustment", b =>
+            modelBuilder.Entity("Server.Models.GrowLog", b =>
                 {
-                    b.HasOne("Server.Models.AdditiveAdjustment", null)
-                        .WithMany("PHAdjustments")
-                        .HasForeignKey("AdditiveAdjustmentId");
+                    b.HasOne("Server.Models.Plant", "Plant")
+                        .WithMany("GrowLogs")
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plant");
                 });
 
             modelBuilder.Entity("Server.Models.AdditiveAdjustment", b =>
                 {
                     b.Navigation("Dosages");
-
-                    b.Navigation("PHAdjustments");
                 });
 
             modelBuilder.Entity("Server.Models.GrowLog", b =>
@@ -237,9 +320,9 @@ namespace Server.Migrations.GrowLog
                     b.Navigation("AdditiveAdjustments");
                 });
 
-            modelBuilder.Entity("Server.Models.PHAdjustment", b =>
+            modelBuilder.Entity("Server.Models.Plant", b =>
                 {
-                    b.Navigation("Dosages");
+                    b.Navigation("GrowLogs");
                 });
 #pragma warning restore 612, 618
         }

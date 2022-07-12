@@ -15,8 +15,8 @@ import {
 import { useState } from "react";
 import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
-import GrowLog from "../../../models/GrowLog";
-import { toShortDate } from "../../../util/functions";
+import GrowLog, { GrowLogDto } from "../../../models/GrowLog";
+import { get, toShortDate } from "../../../util/functions";
 import BasePage from "../BasePage";
 import GrowLogDetail from "./GrowLogDetail";
 
@@ -44,11 +44,9 @@ const GrowLogList: React.FC<GrowLogListProps> = ({ plantId }: GrowLogListProps) 
     useEffectOnce(() => {
         const getGrowLogs = async () => {
             try {
-                const res = await fetch("https://localhost:7247/GrowLog");
-                if (!res.ok) {
-                    console.log(res.status, res.statusText);
-                } else {
-                    setGrowLogs(await res.json());
+                const res = await get<GrowLogDto[]>("https://localhost:7247/GrowLog");
+                if (res.parsedBody) {
+                    setGrowLogs(res.parsedBody.map(g => GrowLog.fromDTO(g)));
                 }
             } catch (e: any) {
                 console.log(JSON.stringify(e));

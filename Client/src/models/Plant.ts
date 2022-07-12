@@ -20,11 +20,11 @@ export default class Plant {
     public terminationReason?: string;
   
     // Very simple since the View model is more permissive of nulls
-    public static fromDTO = (dto: PlantDTO): Plant => <Plant>dto;
+    public static fromDTO = (dto: PlantDto): Plant => <Plant>dto;
   }
   
   // DTO we get back from the server
-export class PlantDTO {
+export class PlantDto {
     public id!: number;
     public name!: string;
     public strain?: string;
@@ -46,8 +46,7 @@ export class PlantDTO {
   // DTO we send to the server
   // The default values are needed so that we can properly use Object.keys()
   // Without them, JS just sees an empty object coming back from the constructor
-export class PlantSaveDTO {
-    public id?: number = undefined;
+export class PlantSaveDto {
     public name: string = "";
     public strain?: string = undefined;
     public breeder?: string = undefined;
@@ -65,9 +64,9 @@ export class PlantSaveDTO {
     public terminationReason?: string = undefined;
   
     // More involved since we want to do some validations and the DTO is more strict about nulls
-    public static fromView = (view: Plant): PlantSaveDTO => {
-        checkRequiredProperties<PlantSaveDTO, Plant>(new PlantSaveDTO(), view);
+    public static fromView = (view: Plant): PlantSaveDto => {
+        checkRequiredProperties<PlantSaveDto, Plant>(new PlantSaveDto(), view);
   
-        return <PlantDTO>view;
+        return <PlantDto>view;
     }
 }

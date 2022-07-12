@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
 using Server.Services;
@@ -11,11 +11,13 @@ namespace Server.Controllers
     {
         private readonly ILogger<PlantController> _logger;
         private readonly IPlantService _plantService;
+        private readonly IMapper _mapper;
 
-        public PlantController(ILogger<PlantController> logger, IPlantService plantService)
+        public PlantController(ILogger<PlantController> logger, IPlantService plantService, IMapper mapper)
         {
             _logger = logger;
             _plantService = plantService;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -30,21 +32,21 @@ namespace Server.Controllers
             var plant = _plantService.GetOne(id);
             if (plant == null) return NotFound();
 
-            return Ok(plant);
+            return Ok(_mapper.Map<PlantDto>(plant));
         }
 
         [HttpPost]
-        public IActionResult Create([FromBody] Plant newPlant)
+        public IActionResult Create([FromBody] PlantSaveDto newPlant)
         {
-            var plant = _plantService.Create(newPlant);
-            return CreatedAtRoute("GetPlantById", new { id = plant.Id }, plant);
+            var plant = _plantService.Create(_mapper.Map<Plant>(newPlant));
+            return CreatedAtRoute("GetPlantById", new { id = plant.Id }, _mapper.Map<PlantDto>(plant));
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update([FromBody] Plant plant)
+        public IActionResult Update([FromRoute] int id, [FromBody] PlantSaveDto plant)
         {
-            var updatedPlant = _plantService.Update(plant);
-            return Ok(updatedPlant);
+            var updatedPlant = _plantService.Update(_mapper.Map<Plant>(plant, opts => opts.AfterMap((o,p) => p.Id = id)));
+            return Ok(_mapper.Map<PlantDto>(updatedPlant));
         }
     }
 }

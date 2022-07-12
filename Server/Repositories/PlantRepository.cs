@@ -6,9 +6,9 @@ namespace Server.Repositories
     public interface IPlantRepository : IRepository<Plant> { }
     public class PlantRepository : IPlantRepository
     {
-        private readonly PlantContext _context;
+        private readonly CannaLogContext _context;
 
-        public PlantRepository(PlantContext context)
+        public PlantRepository(CannaLogContext context)
         {
             _context = context;
         }

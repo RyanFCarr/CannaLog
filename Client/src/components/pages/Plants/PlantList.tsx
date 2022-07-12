@@ -15,9 +15,10 @@ import IconButton from "../../custom/Themed/ThemedIconButton";
 import { useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
-import Plant from "../../../models/Plant";
+import Plant, { PlantDto } from "../../../models/Plant";
 import BasePage from "../BasePage";
 import PlantDetail from "./PlantDetail";
+import { get } from "../../../util/functions";
 
 const Layout: React.FC = () => {
     return (
@@ -38,11 +39,9 @@ const PlantList: React.FC = () => {
     useEffectOnce(() => {
         const getPlants = async () => {
             try {
-                const res = await fetch("https://localhost:7247/plant");
-                if (!res.ok) {
-                    console.log(res.status, res.statusText);
-                } else {
-                    setPlants(await res.json());
+                const res = await get<PlantDto[]>("https://localhost:7247/plant");
+                if (res.parsedBody) {
+                    setPlants(res.parsedBody.map(p => Plant.fromDTO(p)));
                 }
             } catch (e: any) {
                 console.log(JSON.stringify(e));

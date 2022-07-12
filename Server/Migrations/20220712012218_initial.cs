@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Server.Migrations.GrowLog
+namespace Server.Migrations
 {
-    public partial class AddGrowLog : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -17,11 +17,39 @@ namespace Server.Migrations.GrowLog
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Brand = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Tags = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Additive", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Plants",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Strain = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Breeder = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    BaseNutrientsBrand = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsFeminized = table.Column<bool>(type: "bit", nullable: false),
+                    TargetPH = table.Column<decimal>(type: "decimal(3,1)", precision: 3, scale: 1, nullable: false),
+                    TransplantDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    HarvestDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    GrowType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LightingType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LightingSchedule = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    GrowMedium = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TerminationReason = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Age = table.Column<int>(type: "int", nullable: true, computedColumnSql: "CASE WHEN TransplantDate IS NULL THEN NULL ELSE DATEDIFF(DAY, TransplantDate, COALESCE(HarvestDate, GETDATE())) END")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Plants", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -40,6 +68,7 @@ namespace Server.Migrations.GrowLog
                     LightHeight = table.Column<decimal>(type: "decimal(4,1)", precision: 4, scale: 1, nullable: true),
                     LogDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlantId = table.Column<int>(type: "int", nullable: false),
                     PlantAge = table.Column<int>(type: "int", nullable: false),
                     PlantHeight = table.Column<decimal>(type: "decimal(4,1)", precision: 4, scale: 1, nullable: true),
                     Tags = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -47,6 +76,12 @@ namespace Server.Migrations.GrowLog
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GrowLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GrowLogs_Plants_PlantId",
+                        column: x => x.PlantId,
+                        principalTable: "Plants",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -57,6 +92,7 @@ namespace Server.Migrations.GrowLog
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FinalPPM = table.Column<int>(type: "int", nullable: false),
                     InitialPPM = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     GrowLogId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -70,26 +106,6 @@ namespace Server.Migrations.GrowLog
                 });
 
             migrationBuilder.CreateTable(
-                name: "PHAdjustment",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FinalPH = table.Column<decimal>(type: "decimal(3,1)", precision: 3, scale: 1, nullable: false),
-                    InitialPH = table.Column<decimal>(type: "decimal(3,1)", precision: 3, scale: 1, nullable: false),
-                    AdditiveAdjustmentId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PHAdjustment", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PHAdjustment_AdditiveAdjustment_AdditiveAdjustmentId",
-                        column: x => x.AdditiveAdjustmentId,
-                        principalTable: "AdditiveAdjustment",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AdditiveDosage",
                 columns: table => new
                 {
@@ -98,8 +114,7 @@ namespace Server.Migrations.GrowLog
                     AdditiveId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(8,3)", precision: 8, scale: 3, nullable: false),
                     UnitofMeasure = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AdditiveAdjustmentId = table.Column<int>(type: "int", nullable: true),
-                    PHAdjustmentId = table.Column<int>(type: "int", nullable: true)
+                    AdditiveAdjustmentId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -115,11 +130,18 @@ namespace Server.Migrations.GrowLog
                         column: x => x.AdditiveAdjustmentId,
                         principalTable: "AdditiveAdjustment",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AdditiveDosage_PHAdjustment_PHAdjustmentId",
-                        column: x => x.PHAdjustmentId,
-                        principalTable: "PHAdjustment",
-                        principalColumn: "Id");
+                });
+
+            migrationBuilder.InsertData(
+                table: "Additive",
+                columns: new[] { "Id", "Brand", "Name", "Tags", "Type" },
+                values: new object[,]
+                {
+                    { 1, "General Hydroponics", "Micro", null, "NUTES" },
+                    { 2, "General Hydroponics", "Bloom", null, "NUTES" },
+                    { 3, "General Hydroponics", "CaliMag", null, "NUTES" },
+                    { 4, "General Hydroponics", "PH Up", null, "PH" },
+                    { 5, "General Hydroponics", "PH Down", null, "PH" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -138,14 +160,9 @@ namespace Server.Migrations.GrowLog
                 column: "AdditiveId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AdditiveDosage_PHAdjustmentId",
-                table: "AdditiveDosage",
-                column: "PHAdjustmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PHAdjustment_AdditiveAdjustmentId",
-                table: "PHAdjustment",
-                column: "AdditiveAdjustmentId");
+                name: "IX_GrowLogs_PlantId",
+                table: "GrowLogs",
+                column: "PlantId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -157,13 +174,13 @@ namespace Server.Migrations.GrowLog
                 name: "Additive");
 
             migrationBuilder.DropTable(
-                name: "PHAdjustment");
-
-            migrationBuilder.DropTable(
                 name: "AdditiveAdjustment");
 
             migrationBuilder.DropTable(
                 name: "GrowLogs");
+
+            migrationBuilder.DropTable(
+                name: "Plants");
         }
     }
 }

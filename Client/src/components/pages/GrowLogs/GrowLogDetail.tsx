@@ -1,14 +1,14 @@
 import { Box, Button, Dialog, TextField, Typography } from "@mui/material";
 import { Add as AddIcon } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import GrowLog from "../../../models/GrowLog";
-import { toShortDate } from "../../../util/functions";
+import { useNavigate, useParams } from "react-router-dom";
+import GrowLog, { GrowLogDto, GrowLogSaveDto } from "../../../models/GrowLog";
+import { get, post, put, toShortDate } from "../../../util/functions";
 import BasePage from "../BasePage";
 import MultiSelectChip from "../../custom/MultiSelectChip";
 import NutrientStepper from "../../custom/NutrientStepper";
 import { AdditiveDto, AdditiveType } from "../../../models/Additive";
-import Plant from "../../../models/Plant";
+import Plant, { PlantDto } from "../../../models/Plant";
 import { differenceInCalendarDays } from "date-fns";
 
 enum ViewMode {
@@ -98,37 +98,33 @@ const GrowLogDetail: React.FC<GrowLogDetailProps> = ({ plantId, growLogId, viewM
 
     useEffect(() => {
         const getGrowLog = async () => {
+            let plant: Plant;
             let log: GrowLog = new GrowLog();
             log.plantId = plantId;
 
-            let res: Response;
             if (growLogId) {
-                let res = await fetch(
-                    `https://localhost:7247/plant/${plantId}/growlog/${growLogId}`
+                let growLogResponse = await get<GrowLogDto>(
+                    `https://localhost:7247/growlog/${growLogId}`
                 );
-                if (!res.ok) {
-                    console.log(res.status, res.statusText);
-                    return;
+                if (growLogResponse.parsedBody) {
+                    log = GrowLog.fromDTO(growLogResponse.parsedBody);
                 }
-
-                log = await res.json();
             }
 
-            res = await fetch(
+            let plantResponse = await get<PlantDto>(
                 `https://localhost:7247/plant/${plantId}`
             );
-            if (!res.ok) {
-                console.log(res.status, res.statusText);
-                return;
+            if (plantResponse.parsedBody) {
+                plant = Plant.fromDTO(plantResponse.parsedBody);
+                log.plantAge = differenceInCalendarDays(new Date(log.logDate), plant.transplantDate ? new Date(plant.transplantDate) : new Date());
+
+                setPlant(plant);
+                setEditModeLog(log);
+                setOGLog(log);
+            } else {
+                // This should hopefully never be hit
+                throw new Error("Unable to get Plant");
             }
-
-            const plant: Plant = await res.json();
-
-            log.plantAge = differenceInCalendarDays(new Date(log.logDate), plant.transplantDate ? new Date(plant.transplantDate) : new Date());
-
-            setPlant(plant);
-            setEditModeLog(log);
-            setOGLog(log);
         };
         try {
             getGrowLog();
@@ -386,59 +382,35 @@ interface GrowLogDetailFooterProps {
 }
 
 const Footer: React.FC<GrowLogDetailFooterProps> = ({ viewMode, setViewMode, plantId, editModeLog, setEditModeLog, OGLog, setOpenAddNutrient }: GrowLogDetailFooterProps) => {
+    const navigate = useNavigate();
     const add = async () => {
         try {
-            // const res = await fetch("https://localhost:7247/GrowLog", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify(editModeLog),
-            // });
+            const res = await post<GrowLogSaveDto, GrowLogDto>("https://localhost:7247/GrowLog", GrowLogSaveDto.fromView(editModeLog));
 
-            // if (!res.ok) {
-            //     console.log(res.status, res.statusText);
-            // } else {
-            //     const data: GrowLog = await res.json();
-            //     navigate(`/plants/${plantId}/growlogs/${data.id}`);
-            // }
-            console.table(editModeLog);
+            if (res.parsedBody) {
+                navigate(`/plants/${res.parsedBody.plantId}/growlogs/${res.parsedBody.id}`);
+            }
         } catch (e: any) {
             console.log(JSON.stringify(e));
         }
     };
     const update = async () => {
-        // try {
-        //     const res = await fetch(
-        //         `https://localhost:7247/GrowLog/${editModeLog.id}`,
-        //         {
-        //             method: "PUT",
-        //             headers: {
-        //                 "Content-Type": "application/json",
-        //             },
-        //             body: JSON.stringify(editModeLog),
-        //         }
-        //     );
-        //     if (!res.ok) {
-        //         console.log(res.status, res.statusText);
-        //     } else {
-        //         const data: GrowLog = await res.json();
-        //         navigate(`/plants/${plantId}/growlogs/${data.id}`);
-        //     }
-        // } catch (e: any) {
-        //     console.log(JSON.stringify(e));
-        // }
-        console.table(editModeLog);
+        try {
+            const res = await put<GrowLogSaveDto, GrowLogDto>(`https://localhost:7247/GrowLog/${editModeLog.id}`, GrowLogSaveDto.fromView(editModeLog));
+            if (res.parsedBody) {
+                navigate(`/plants/${res.parsedBody.plantId}/growlogs/${res.parsedBody.id}`);
+            }
+        } catch (e: any) {
+            console.log(JSON.stringify(e));
+        }
     };
     const handleSubmit = () => {
         if (viewMode === ViewMode.VIEW) {
             setViewMode(ViewMode.EDIT);
         } else if (viewMode === ViewMode.ADD) {
             add();
-            //setViewMode(ViewMode.VIEW);
         } else {
             update();
-            //setViewMode(ViewMode.VIEW);
         }
     };
     const handleEditDiscard = () => {

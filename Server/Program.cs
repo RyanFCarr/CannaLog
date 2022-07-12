@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Server.Contexts;
+using Server.Models;
 using Server.Repositories;
 using Server.Services;
 
@@ -9,14 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 // Add DbContexts
-builder.Services.AddDbContext<PlantContext>(b => b.UseSqlServer(builder.Configuration.GetConnectionString("CannaLog")));
-builder.Services.AddDbContext<GrowLogContext>(b => b.UseSqlServer(builder.Configuration.GetConnectionString("CannaLog")));
+builder.Services.AddDbContext<CannaLogContext>(b => b.UseSqlServer(builder.Configuration.GetConnectionString("CannaLog")));
 
 // Add Services and Repos
 builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IPlantRepository, PlantRepository>();
 builder.Services.AddScoped<IGrowLogService, GrowLogService>();
 builder.Services.AddScoped<IGrowLogRepository, GrowLogRepository>();
+
+// Automapper config
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<AutoMapperProfile>();
+});
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
