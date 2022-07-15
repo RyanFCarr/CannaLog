@@ -7,6 +7,9 @@ namespace Server.Contexts
     {
         public DbSet<Plant> Plants { get; set; }
         public DbSet<GrowLog> GrowLogs { get; set; }
+        public DbSet<Additive> Additives { get; set; }
+        public DbSet<AdditiveAdjustment> AdditiveAdjustments { get; set; }
+        public DbSet<AdditiveDosage> AdditiveDosages { get; set; }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public CannaLogContext(DbContextOptions<CannaLogContext> options) : base(options) { }
@@ -54,7 +57,8 @@ namespace Server.Contexts
                     new Additive{ Id = 2, Brand = "General Hydroponics", Name = "Bloom", Type = "NUTES" },
                     new Additive{ Id = 3, Brand = "General Hydroponics", Name = "CaliMag", Type = "NUTES" },
                     new Additive{ Id = 4, Brand = "General Hydroponics", Name = "PH Up", Type = "PH" },
-                    new Additive{ Id = 5, Brand = "General Hydroponics", Name = "PH Down", Type = "PH" }
+                    new Additive{ Id = 5, Brand = "General Hydroponics", Name = "PH Down", Type = "PH" },
+                    new Additive{ Id = 6, Brand = "Botanicare", Name = "Hydroguard", Type = "ROOT SUPPLEMENT" }
                 });
             modelBuilder.Entity<AdditiveDosage>()
                 .Property(p => p.Amount)

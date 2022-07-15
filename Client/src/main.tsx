@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import BasePage from "./components/pages/BasePage";
 import Home from "./components/pages/Home";
 import PlantList from "./components/pages/Plants/PlantList";
+import FeedBack from "./components/pages/Feedback/FeedBack";
 import "./index.css";
 
 const theme = createTheme({
@@ -33,8 +34,18 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <React.StrictMode>
             <BrowserRouter>
                 <Routes>
-                    <Route index element={<BasePage title="Welcome" Body={<Home />} Footer={<></>} />} />
+                    <Route
+                        index
+                        element={
+                            <BasePage
+                                title="Welcome"
+                                Body={<Home />}
+                                Footer={<></>}
+                            />
+                        }
+                    />
                     <Route path="plants/*" element={<PlantList />} />
+                    <Route path="feedback/*" element={<FeedBack />} />
                 </Routes>
             </BrowserRouter>
         </React.StrictMode>

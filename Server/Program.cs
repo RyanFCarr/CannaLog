@@ -17,6 +17,8 @@ builder.Services.AddScoped<IPlantService, PlantService>();
 builder.Services.AddScoped<IPlantRepository, PlantRepository>();
 builder.Services.AddScoped<IGrowLogService, GrowLogService>();
 builder.Services.AddScoped<IGrowLogRepository, GrowLogRepository>();
+builder.Services.AddScoped<IAdditiveService, AdditiveService>();
+builder.Services.AddScoped<IAdditiveRepository, AdditiveRepository>();
 
 // Automapper config
 builder.Services.AddAutoMapper(cfg => {

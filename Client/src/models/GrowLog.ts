@@ -1,5 +1,5 @@
 import { toShortDate } from "../util/functions";
-import AdditiveAdjustment, { AdditiveAdjustmentDto, AdditiveAdjustmentSaveDto } from "./AdditiveAdjustment";
+import { AdditiveAdjustment, AdditiveAdjustmentDto, AdditiveAdjustmentSaveDto } from "./AdditiveAdjustment";
 import { checkRequiredProperties } from "./ModelHelpers";
 
 export default class GrowLog {
@@ -67,11 +67,13 @@ export class GrowLogSaveDto {
     public notes?: string = undefined;
     public tags?: string = undefined;
 
-    
     public static fromView = (view: GrowLog): GrowLogSaveDto => {
         // This is going to be more complicated because of the nested objects not being of the same type
         // checkRequiredProperties<GrowLogSaveDTO, GrowLog>(new GrowLogSaveDTO(), view);
-  
+        const saveDto = <GrowLogSaveDto>view;
+        if (view.nutrientAdjustment) saveDto.nutrientAdjustment = AdditiveAdjustmentSaveDto.fromView(view.nutrientAdjustment);
+        if (view.phAdjustment) saveDto.phAdjustment = AdditiveAdjustmentSaveDto.fromView(view.phAdjustment);
+
         return <GrowLogSaveDto>view;
     }
 }
