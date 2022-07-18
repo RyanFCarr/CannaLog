@@ -1,14 +1,7 @@
 import {
     Add as AddIcon,
-    ArrowForwardIos as ForwardArrowIcon,
 } from "@mui/icons-material";
 import {
-    Table,
-    TableHead,
-    TableRow,
-    TableCell,
-    TableBody,
-    IconButton,
     Box,
     Button,
 } from "@mui/material";
@@ -17,6 +10,7 @@ import { Routes, Route, useNavigate, useParams } from "react-router-dom";
 import { useEffectOnce } from "../../../hooks/useEffectOnce";
 import GrowLog, { GrowLogDto } from "../../../models/GrowLog";
 import { get, toShortDate } from "../../../util/functions";
+import Table from "../../custom/Table";
 import BasePage from "../BasePage";
 import GrowLogDetail from "./GrowLogDetail";
 
@@ -56,55 +50,7 @@ const GrowLogList: React.FC<GrowLogListProps> = ({ plantId }: GrowLogListProps) 
     }, []);
 
     return (
-        <Table>
-            <TableHead>
-                <TableRow>
-                    <TableCell>Log Date</TableCell>
-                    <TableCell>Plant Age</TableCell>
-                    <TableCell>Final PH</TableCell>
-                    <TableCell>Final PPM</TableCell>
-                    <TableCell></TableCell>
-                </TableRow>
-            </TableHead>
-            <TableBody>
-                {!growLogs?.length && (
-                    <TableRow>
-                        <TableCell align="center" colSpan={4}>
-                            No rows
-                        </TableCell>
-                    </TableRow>
-                )}
-                {growLogs &&
-                    growLogs.map((log) => (
-                        <TableRow
-                            key={log.id}
-                            sx={{
-                                "&:last-child td, &:last-child th": {
-                                    border: 0,
-                                },
-                            }}
-                        >
-                            <TableCell component="th" scope="row">
-                                {toShortDate(log.logDate?.toString())}
-                            </TableCell>
-                            <TableCell>{log.plantAge}</TableCell>
-                            <TableCell>{log.finalPH}</TableCell>
-                            <TableCell>{log.finalPPM}</TableCell>
-                            <TableCell>
-                                <IconButton
-                                    onClick={() =>
-                                        navigate(
-                                            `/plants/${plantId}/growlogs/${log.id}`
-                                        )
-                                    }
-                                >
-                                    <ForwardArrowIcon />
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-            </TableBody>
-        </Table>
+        <Table data={growLogs} columnHeaders={["Plant Age", "Final PH", "Final PPM"]} onRowClick={(growLog: GrowLog) => navigate(`/plants/${growLog.plantId}/growlogs/${growLog.id}`)} />
     );
 };
 

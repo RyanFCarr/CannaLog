@@ -11,7 +11,6 @@ namespace Server.Models
                 .ForMember(dest => dest.GrowLogs, opt => opt.Ignore());
 
             CreateMap<GrowLog, GrowLogDto>()
-                .ForMember(dest => dest.PlantId, opt => opt.MapFrom(src => src.Plant.Id))
                 .ForMember(dest => dest.NutrientAdjustment, opt => opt.MapFrom(src => src.AdditiveAdjustments.FirstOrDefault(a => a.Type == "NUTES")))
                 .ForMember(dest => dest.PHAdjustment, opt => opt.MapFrom(src => src.AdditiveAdjustments.FirstOrDefault(a => a.Type == "PH")));
             CreateMap<GrowLogSaveDto, GrowLog>()

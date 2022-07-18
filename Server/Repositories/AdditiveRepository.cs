@@ -1,5 +1,6 @@
 ﻿using Server.Contexts;
 using Server.Models;
+using System.Linq.Expressions;
 
 namespace Server.Repositories
 {
@@ -23,6 +24,7 @@ namespace Server.Repositories
         }
 
         public IEnumerable<Additive> GetAll() => _context.Additives;
+        public IEnumerable<Additive> GetAll(Expression<Func<Additive, bool>> filter) => _context.Additives.Where(filter);
 
         public Additive? GetOne(int id)
         {

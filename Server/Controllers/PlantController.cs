@@ -11,20 +11,19 @@ namespace Server.Controllers
     {
         private readonly ILogger<PlantController> _logger;
         private readonly IPlantService _plantService;
+        private readonly IGrowLogService _growLogService;
         private readonly IMapper _mapper;
 
-        public PlantController(ILogger<PlantController> logger, IPlantService plantService, IMapper mapper)
+        public PlantController(ILogger<PlantController> logger, IPlantService plantService, IGrowLogService growLogService, IMapper mapper)
         {
             _logger = logger;
             _plantService = plantService;
+            _growLogService = growLogService;
             _mapper = mapper;
         }
 
         [HttpGet]
-        public IEnumerable<Plant> GetAll()
-        {
-            return _plantService.GetAll();
-        }
+        public IActionResult GetAll() => Ok(_plantService.GetAll().Select(p => _mapper.Map<PlantDto>(p)));
 
         [HttpGet("{id}", Name = "GetPlantById")]
         public IActionResult GetById([FromRoute] int id)
@@ -34,6 +33,9 @@ namespace Server.Controllers
 
             return Ok(_mapper.Map<PlantDto>(plant));
         }
+
+        [HttpGet("{id}/growlog")]
+        public IActionResult GetGrowLogsForPlant([FromRoute] int id) => Ok(_growLogService.GetAll(g => g.PlantId == id).Select(g => _mapper.Map<GrowLogDto>(g)));
 
         [HttpPost]
         public IActionResult Create([FromBody] PlantSaveDto newPlant)

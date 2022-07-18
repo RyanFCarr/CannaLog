@@ -1,5 +1,6 @@
 ﻿using Server.Models;
 using Server.Repositories;
+using System.Linq.Expressions;
 
 namespace Server.Services
 {
@@ -18,6 +19,8 @@ namespace Server.Services
         public void Delete(int id) => _repo.Delete(id);
 
         public IEnumerable<GrowLog> GetAll() => _repo.GetAll();
+
+        public IEnumerable<GrowLog> GetAll(Expression<Func<GrowLog, bool>> filter) => _repo.GetAll(filter);
 
         public GrowLog? GetOne(int id) => _repo.GetOne(id);
 

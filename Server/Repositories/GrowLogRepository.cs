@@ -1,5 +1,6 @@
 ﻿using Server.Contexts;
 using Server.Models;
+using System.Linq.Expressions;
 
 namespace Server.Repositories
 {
@@ -32,6 +33,7 @@ namespace Server.Repositories
         }
 
         public IEnumerable<GrowLog> GetAll() => _context.GrowLogs;
+        public IEnumerable<GrowLog> GetAll(Expression<Func<GrowLog,bool>> filter) => _context.GrowLogs.Where(filter);
 
         public GrowLog? GetOne(int id) => _context.GrowLogs.Find(id);
 

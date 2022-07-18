@@ -21,7 +21,7 @@ namespace Server.Controllers
         }
 
         [HttpGet]
-        public IActionResult Get() => Ok(_growLogService.GetAll());
+        public IActionResult Get() => Ok(_growLogService.GetAll().Select(g => _mapper.Map<GrowLogDto>(g)));
 
         [HttpGet("{id}", Name = "GetGrowLogById")]
         public IActionResult GetById([FromRoute] int id)

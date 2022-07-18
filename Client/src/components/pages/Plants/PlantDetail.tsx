@@ -22,6 +22,8 @@ import { toShortDate, trimToUndefined } from '../../../util/functions';
 import GrowLogList from '../GrowLogs/GrowLogList';
 import BasePage from '../BasePage';
 import { get, post, put } from '../../../util/functions';
+import Table from '../../custom/Table';
+import GrowLog, { GrowLogDto } from '../../../models/GrowLog';
 
 //#region Enums
 enum ViewMode {
@@ -108,7 +110,6 @@ interface PlantDetailProps {
 	lightingSchedOptions: string[];
 	setLightingSchedOptions: React.Dispatch<React.SetStateAction<string[]>>;
 }
-
 const PlantDetail: React.FC<PlantDetailProps> = ({
 	plantId,
 	viewMode,
@@ -119,9 +120,11 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 	lightingSchedOptions,
 	setLightingSchedOptions,
 }: PlantDetailProps) => {
+	const navigate = useNavigate();
 	// #region State
 	const [open, toggleOpen] = useState(false);
 	const [addNutesDialog, setAddNutesDialog] = useState<string>();
+	const [growLogs, setGrowLogs] = useState<GrowLog[]>([]);
 	// #endregion
 	// #region Dialog methods
 	const handleClose = () => {
@@ -139,23 +142,28 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 	// #endregion
 
 	useEffectOnce(() => {
-		const getPlant = async () => {
+		const getData = async () => {
 			if (!plantId) return;
 			try {
-				const res = await get<PlantDto>(`https://localhost:7247/Plant/${plantId}`);
+				const plantRes = await get<PlantDto>(`https://localhost:7247/Plant/${plantId}`);
 				//TODO: HTTP code handling e.g.: 404
-				if (res.parsedBody) {
-					const plant: Plant = Plant.fromDTO(res.parsedBody);
+				if (plantRes.parsedBody) {
+					const plant: Plant = Plant.fromDTO(plantRes.parsedBody);
 					setEditModePlant(plant);
 					setOGPlant(plant);
 					setDefaultLightingSchedule(plant.growType);
+				}
+				const logRes = await get<GrowLogDto[]>(`https://localhost:7247/Plant/${plantId}/Growlog`);
+				if (logRes.parsedBody) {
+					const logs: GrowLog[] = logRes.parsedBody.map(l => GrowLog.fromDTO(l));
+					setGrowLogs(logs);
 				}
 			} catch (e: any) {
 				console.log(JSON.stringify(e));
 			}
 		};
-		getPlant();
-	}, []);
+		getData();
+	}, [plantId]);
 
 	let textFieldProps: {
 		variant?: TextVariants;
@@ -444,6 +452,13 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 					}
 				/>
 			)}
+			<Table
+				columnHeaders={["Log Date", "Plant Age"]}
+				data={growLogs}
+				onRowClick={(growLog: GrowLog) => navigate(`/plants/${growLog.plantId}/growLogs/${growLog.id}`)}
+				sx={{ marginTop: 2 }}
+				title={"Grow Logs"}
+			/>
 			<Dialog open={open} onClose={handleClose}>
 				<form onSubmit={handleSubmitDialog}>
 					<DialogTitle>Add Base Nutrients</DialogTitle>
