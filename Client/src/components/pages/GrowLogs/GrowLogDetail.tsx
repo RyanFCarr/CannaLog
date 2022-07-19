@@ -53,7 +53,7 @@ const Layout: React.FC = () => {
 	// useMemo?
 	useEffect(() => {
 		const getAdditives = async () => {
-			const res = await get<AdditiveDto[]>('https://localhost:7247/Additive/');
+			const res = await get<AdditiveDto[]>(`${import.meta.env.VITE_API_BASE_URL}/Additive/`);
 			if (res.ok && res.parsedBody) setAdditives(res.parsedBody.map(a => Additive.fromDTO(a)));
 		};
 		getAdditives();
@@ -118,13 +118,13 @@ const GrowLogDetail: React.FC<GrowLogDetailProps> = ({ plantId, growLogId, viewM
 			log.plantId = plantId;
 
 			if (growLogId) {
-				let growLogResponse = await get<GrowLogDto>(`https://localhost:7247/growlog/${growLogId}`);
+				let growLogResponse = await get<GrowLogDto>(`${import.meta.env.VITE_API_BASE_URL}/growlog/${growLogId}`);
 				if (growLogResponse.parsedBody) {
 					log = GrowLog.fromDTO(growLogResponse.parsedBody);
 				}
 			}
 
-			let plantResponse = await get<PlantDto>(`https://localhost:7247/plant/${plantId}`);
+			let plantResponse = await get<PlantDto>(`${import.meta.env.VITE_API_BASE_URL}/plant/${plantId}`);
 			if (plantResponse.parsedBody) {
 				plant = Plant.fromDTO(plantResponse.parsedBody);
 				log.plantAge = differenceInCalendarDays(new Date(log.logDate), plant.transplantDate ? new Date(plant.transplantDate) : new Date());
@@ -401,7 +401,7 @@ const Footer: React.FC<GrowLogDetailFooterProps> = ({
 	const navigate = useNavigate();
 	const add = async () => {
 		try {
-			const res = await post<GrowLogSaveDto, GrowLogDto>('https://localhost:7247/GrowLog', GrowLogSaveDto.fromView(editModeLog));
+			const res = await post<GrowLogSaveDto, GrowLogDto>(`${import.meta.env.VITE_API_BASE_URL}/GrowLog`, GrowLogSaveDto.fromView(editModeLog));
 
 			if (res.parsedBody) {
 				setViewMode(ViewMode.VIEW);
@@ -414,7 +414,7 @@ const Footer: React.FC<GrowLogDetailFooterProps> = ({
 	const update = async () => {
 		try {
 			const res = await put<GrowLogSaveDto, GrowLogDto>(
-				`https://localhost:7247/GrowLog/${editModeLog.id}`,
+				`${import.meta.env.VITE_API_BASE_URL}/GrowLog/${editModeLog.id}`,
 				GrowLogSaveDto.fromView(editModeLog)
 			);
 			if (res.parsedBody) {

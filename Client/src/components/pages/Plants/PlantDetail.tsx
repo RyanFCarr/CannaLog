@@ -453,11 +453,11 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
 				/>
 			)}
 			<Table
-				columnHeaders={["Log Date", "Plant Age"]}
+				columnHeaders={['Log Date', 'Plant Age']}
 				data={growLogs}
 				onRowClick={(growLog: GrowLog) => navigate(`/plants/${growLog.plantId}/growLogs/${growLog.id}`)}
 				sx={{ marginTop: 2 }}
-				title={"Grow Logs"}
+				title={'Grow Logs'}
 			/>
 			<Dialog open={open} onClose={handleClose}>
 				<form onSubmit={handleSubmitDialog}>
@@ -518,7 +518,7 @@ const Footer: React.FC<PlantDetailFooterProps> = ({
 	const add = async () => {
 		try {
 			validateForm();
-			const res = await post<PlantSaveDto, PlantDto>('https://localhost:7247/Plant', PlantSaveDto.fromView(editModePlant));
+			const res = await post<PlantSaveDto, PlantDto>(`${import.meta.env.VITE_API_BASE_URL}/Plant`, PlantSaveDto.fromView(editModePlant));
 
 			if (res.parsedBody) {
 				const data: Plant = Plant.fromDTO(res.parsedBody);
@@ -532,7 +532,10 @@ const Footer: React.FC<PlantDetailFooterProps> = ({
 	const update = async () => {
 		try {
 			validateForm();
-			const res = await put<PlantSaveDto, PlantDto>(`https://localhost:7247/Plant/${editModePlant.id}`, PlantSaveDto.fromView(editModePlant));
+			const res = await put<PlantSaveDto, PlantDto>(
+				`${import.meta.env.VITE_API_BASE_URL}/Plant/${editModePlant.id}`,
+				PlantSaveDto.fromView(editModePlant)
+			);
 
 			if (res.parsedBody) {
 				const data: Plant = Plant.fromDTO(res.parsedBody);
