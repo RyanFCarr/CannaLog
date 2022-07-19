@@ -1,7 +1,0 @@
-{
-    "root": "./Client/dist",
-    "clean_urls": true,
-    "routes": {
-      "/**": "./Client/index.html"
-    }
-}
