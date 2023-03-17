@@ -1,0 +1,13 @@
+dist
+node_modules
+npm-debug.log
+pnpm
+.dockerignore
+.git
+.gitignore
+compose.yaml
+Dockerfile
+README.md
+secrets
+.env
+data

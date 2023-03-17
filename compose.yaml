@@ -1,0 +1,43 @@
+services:
+  db:
+    image: mysql:8.0.32
+    restart: unless-stopped
+    healthcheck:
+      test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
+      interval: 2s
+      retries: 10
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=true
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+    volumes:
+      - mysql:/var/lib/mysql
+
+  server:
+    image: cannalog-server:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - 5080:80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      - CORS_ORIGIN=client:3080
+      - MYSQL_SOURCE=db
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+
+  client:
+    build: .
+    restart: unless-stopped
+    ports:
+      - 3080:80
+    environment:
+      - VITE_API_BASE_URL=http://server:5080
+
+volumes:
+  mysql:
