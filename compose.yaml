@@ -37,7 +37,7 @@ services:
     ports:
       - 3080:80
     environment:
-      - VITE_API_BASE_URL=http://server:5080
+      - API_PROXY=http://server:5080
 
 volumes:
   mysql:

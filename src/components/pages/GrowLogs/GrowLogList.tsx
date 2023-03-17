@@ -44,9 +44,7 @@ const GrowLogList: React.FC<GrowLogListProps> = ({
   useEffectOnce(() => {
     const getGrowLogs = async () => {
       try {
-        const res = await get<GrowLogDto[]>(
-          `${import.meta.env.VITE_API_BASE_URL}/GrowLog`
-        );
+        const res = await get<GrowLogDto[]>("/api/GrowLog");
         if (res.parsedBody) {
           setGrowLogs(res.parsedBody.map((g) => GrowLog.fromDTO(g)));
         }

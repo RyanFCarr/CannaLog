@@ -37,9 +37,7 @@ const PlantList: React.FC = () => {
   useEffectOnce(() => {
     const getPlants = async () => {
       try {
-        const res = await get<PlantDto[]>(
-          `${import.meta.env.VITE_API_BASE_URL}/plant`
-        );
+        const res = await get<PlantDto[]>("/api/plant");
         if (res.parsedBody) {
           setPlants(res.parsedBody.map((p) => Plant.fromDTO(p)));
         }

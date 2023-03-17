@@ -150,9 +150,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
     const getData = async () => {
       if (!plantId) return;
       try {
-        const plantRes = await get<PlantDto>(
-          `https://localhost:7247/Plant/${plantId}`
-        );
+        const plantRes = await get<PlantDto>(`/api/Plant/${plantId}`);
         //TODO: HTTP code handling e.g.: 404
         if (plantRes.parsedBody) {
           const plant: Plant = Plant.fromDTO(plantRes.parsedBody);
@@ -160,9 +158,7 @@ const PlantDetail: React.FC<PlantDetailProps> = ({
           setOGPlant(plant);
           setDefaultLightingSchedule(plant.growType);
         }
-        const logRes = await get<GrowLogDto[]>(
-          `https://localhost:7247/Plant/${plantId}/Growlog`
-        );
+        const logRes = await get<GrowLogDto[]>(`/api/Plant/${plantId}/Growlog`);
         if (logRes.parsedBody) {
           const logs: GrowLog[] = logRes.parsedBody.map((l) =>
             GrowLog.fromDTO(l)
@@ -553,7 +549,7 @@ const Footer: React.FC<PlantDetailFooterProps> = ({
     try {
       validateForm();
       const res = await post<PlantSaveDto, PlantDto>(
-        `${import.meta.env.VITE_API_BASE_URL}/Plant`,
+        "/api/Plant",
         PlantSaveDto.fromView(editModePlant)
       );
 
@@ -570,7 +566,7 @@ const Footer: React.FC<PlantDetailFooterProps> = ({
     try {
       validateForm();
       const res = await put<PlantSaveDto, PlantDto>(
-        `${import.meta.env.VITE_API_BASE_URL}/Plant/${editModePlant.id}`,
+        `/api/Plant/${editModePlant.id}`,
         PlantSaveDto.fromView(editModePlant)
       );
 

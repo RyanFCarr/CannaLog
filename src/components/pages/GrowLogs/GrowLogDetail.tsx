@@ -58,9 +58,7 @@ const Layout: React.FC = () => {
   // useMemo?
   useEffect(() => {
     const getAdditives = async () => {
-      const res = await get<AdditiveDto[]>(
-        `${import.meta.env.VITE_API_BASE_URL}/Additive/`
-      );
+      const res = await get<AdditiveDto[]>("/api/Additive/");
       if (res.ok && res.parsedBody)
         setAdditives(res.parsedBody.map((a) => Additive.fromDTO(a)));
     };
@@ -134,16 +132,14 @@ const GrowLogDetail: React.FC<GrowLogDetailProps> = ({
 
       if (growLogId) {
         let growLogResponse = await get<GrowLogDto>(
-          `${import.meta.env.VITE_API_BASE_URL}/growlog/${growLogId}`
+          `/api/growlog/${growLogId}`
         );
         if (growLogResponse.parsedBody) {
           log = GrowLog.fromDTO(growLogResponse.parsedBody);
         }
       }
 
-      let plantResponse = await get<PlantDto>(
-        `${import.meta.env.VITE_API_BASE_URL}/plant/${plantId}`
-      );
+      let plantResponse = await get<PlantDto>(`/api/plant/${plantId}`);
       if (plantResponse.parsedBody) {
         plant = Plant.fromDTO(plantResponse.parsedBody);
         log.plantAge = differenceInCalendarDays(
@@ -430,7 +426,7 @@ const Footer: React.FC<GrowLogDetailFooterProps> = ({
   const add = async () => {
     try {
       const res = await post<GrowLogSaveDto, GrowLogDto>(
-        `${import.meta.env.VITE_API_BASE_URL}/GrowLog`,
+        "/api/GrowLog",
         GrowLogSaveDto.fromView(editModeLog)
       );
 
@@ -447,7 +443,7 @@ const Footer: React.FC<GrowLogDetailFooterProps> = ({
   const update = async () => {
     try {
       const res = await put<GrowLogSaveDto, GrowLogDto>(
-        `${import.meta.env.VITE_API_BASE_URL}/GrowLog/${editModeLog.id}`,
+        `/api/GrowLog/${editModeLog.id}`,
         GrowLogSaveDto.fromView(editModeLog)
       );
       if (res.parsedBody) {
