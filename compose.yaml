@@ -4,8 +4,8 @@ services:
     restart: unless-stopped
     healthcheck:
       test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
-      interval: 2s
-      retries: 10
+      interval: 3s
+      retries: 20
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=true
       - MYSQL_DATABASE=$MYSQL_DATABASE
