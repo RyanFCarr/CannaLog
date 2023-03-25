@@ -32,7 +32,7 @@ services:
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
 
   client:
-    build: .
+    image: cannalog-client:latest
     restart: unless-stopped
     ports:
       - 3080:80
