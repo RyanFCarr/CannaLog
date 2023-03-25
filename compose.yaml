@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:8.0.32
+    image: mysql:latest
     restart: unless-stopped
     healthcheck:
       test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
