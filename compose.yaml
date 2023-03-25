@@ -14,30 +14,30 @@ services:
     volumes:
       - mysql:/var/lib/mysql
 
-  server:
-    image: cannalog-server:latest
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    ports:
-      - 5080:80
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:80
-      - CORS_ORIGIN=client:3080
-      - MYSQL_SOURCE=db
-      - MYSQL_DATABASE=$MYSQL_DATABASE
-      - MYSQL_USER=$MYSQL_USER
-      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+  # server:
+  #   image: cannalog-server:latest
+  #   restart: unless-stopped
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #   ports:
+  #     - 5080:80
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Production
+  #     - ASPNETCORE_URLS=http://+:80
+  #     - CORS_ORIGIN=client:3080
+  #     - MYSQL_SOURCE=db
+  #     - MYSQL_DATABASE=$MYSQL_DATABASE
+  #     - MYSQL_USER=$MYSQL_USER
+  #     - MYSQL_PASSWORD=$MYSQL_PASSWORD
 
-  client:
-    image: cannalog-client:latest
-    restart: unless-stopped
-    ports:
-      - 3080:80
-    environment:
-      - API_PROXY=http://server:5080
+  # client:
+  #   image: cannalog-client:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - 3080:80
+  #   environment:
+  #     - API_PROXY=http://server:5080
 
 volumes:
   mysql:
