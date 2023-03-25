@@ -29,7 +29,9 @@ pipeline {
             }
           }
           steps {
-            sh 'docker-compose up -d'
+            withEnv(readFile('../../.env/cannalog-client.env').split('\n') as List) {
+              sh 'docker-compose up -d'
+            }
           }
         }
     }
