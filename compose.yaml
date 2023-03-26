@@ -1,22 +1,24 @@
 services:
-  db:
-    image: mysql:8.0.32-debian
-    restart: unless-stopped
-    healthcheck:
-      test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
-      start_period: 10s
-      interval: 3s
-      retries: 20
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=true
-      - MYSQL_DATABASE=$MYSQL_DATABASE
-      - MYSQL_USER=$MYSQL_USER
-      - MYSQL_PASSWORD=$MYSQL_PASSWORD
-    volumes:
-      - mysql:/var/lib/mysql
+  # db:
+  #   image: mysql:latest
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
+  #     start_period: 10s
+  #     interval: 3s
+  #     retries: 20
+  #   environment:
+  #     - MYSQL_RANDOM_ROOT_PASSWORD=true
+  #     - MYSQL_DATABASE=$MYSQL_DATABASE
+  #     - MYSQL_USER=$MYSQL_USER
+  #     - MYSQL_PASSWORD=$MYSQL_PASSWORD
+  #   volumes:
+  #     - mysql:/var/lib/mysql
 
   server:
     image: cannalog-server:latest
+    networks:
+      - cannalog
     restart: unless-stopped
     depends_on:
       db:
@@ -34,6 +36,8 @@ services:
 
   client:
     image: cannalog-client:latest
+    networks:
+      - cannalog
     restart: unless-stopped
     depends_on:
       - server
@@ -44,3 +48,8 @@ services:
 
 volumes:
   mysql:
+
+networks:
+  cannalog:
+    name: cannalog
+    external: true
