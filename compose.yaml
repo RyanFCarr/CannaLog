@@ -43,8 +43,8 @@ services:
     environment:
       - API_PROXY=http://server:5080
 
-volumes:
-  mysql:
+# volumes:
+#   mysql:
 
 networks:
   cannalog:
