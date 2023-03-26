@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:latest
+    image: mysql:8.0.32-debian
     restart: unless-stopped
     healthcheck:
       test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
