@@ -26,7 +26,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - CORS_ORIGIN=client:3080
-      - MYSQL_SOURCE=db
+      - MYSQL_SOURCE=cannalog-db
       - MYSQL_DATABASE=$MYSQL_DATABASE
       - MYSQL_USER=$MYSQL_USER
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
