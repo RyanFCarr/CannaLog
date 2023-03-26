@@ -1,4 +1,7 @@
 services:
+  # For some reason, Jenkins doesn't create the db correctly when done through compose.
+  # We're creating it seperately in the Jenkinsfile instead.
+
   # db:
   #   image: mysql:latest
   #   restart: unless-stopped
