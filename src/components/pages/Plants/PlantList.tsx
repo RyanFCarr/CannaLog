@@ -51,7 +51,7 @@ const PlantList: React.FC = () => {
   return (
     <Table
       data={plants}
-      columnHeaders={["Name", "Strain", "Status", "Age"]}
+      columnHeaders={["Name", "Strain", "Status"]}
       onRowClick={(plant: Plant) => navigate(`/plants/${plant.id}`)}
     />
   );
