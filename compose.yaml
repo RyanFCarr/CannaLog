@@ -1,43 +1,55 @@
 services:
-  db:
-    image: mysql:8.0.32
-    restart: unless-stopped
-    healthcheck:
-      test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
-      interval: 2s
-      retries: 10
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=true
-      - MYSQL_DATABASE=$MYSQL_DATABASE
-      - MYSQL_USER=$MYSQL_USER
-      - MYSQL_PASSWORD=$MYSQL_PASSWORD
-    volumes:
-      - mysql:/var/lib/mysql
+  # For some reason, Jenkins doesn't create the db correctly when done through compose.
+  # We're creating it seperately in the Jenkinsfile instead.
+
+  # db:
+  #   image: mysql:latest
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: '/usr/bin/mysql --user=${MYSQL_USER} --password=${MYSQL_PASSWORD} --execute "SHOW DATABASES;"'
+  #     start_period: 10s
+  #     interval: 3s
+  #     retries: 20
+  #   environment:
+  #     - MYSQL_RANDOM_ROOT_PASSWORD=true
+  #     - MYSQL_DATABASE=$MYSQL_DATABASE
+  #     - MYSQL_USER=$MYSQL_USER
+  #     - MYSQL_PASSWORD=$MYSQL_PASSWORD
+  #   volumes:
+  #     - mysql:/var/lib/mysql
 
   server:
     image: cannalog-server:latest
+    networks:
+      - cannalog
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     ports:
       - 5080:80
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:80
       - CORS_ORIGIN=client:3080
-      - MYSQL_SOURCE=db
+      - MYSQL_SOURCE=cannalog-db
       - MYSQL_DATABASE=$MYSQL_DATABASE
       - MYSQL_USER=$MYSQL_USER
       - MYSQL_PASSWORD=$MYSQL_PASSWORD
 
   client:
-    build: .
+    image: cannalog-client:latest
+    networks:
+      - cannalog
     restart: unless-stopped
+    depends_on:
+      - server
     ports:
       - 3080:80
     environment:
       - API_PROXY=http://server:5080
 
-volumes:
-  mysql:
+# volumes:
+#   mysql:
+
+networks:
+  cannalog:
+    name: cannalog
+    external: true
