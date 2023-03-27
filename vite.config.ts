@@ -7,7 +7,7 @@ export default defineConfig(({ command, mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const proxy =
     process.env.API_PROXY || loadEnv(mode, process.cwd(), "").API_PROXY;
-  console.log(proxy);
+
   return {
     plugins: [react()],
     server: {
