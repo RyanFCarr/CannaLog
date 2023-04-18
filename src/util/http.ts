@@ -51,3 +51,14 @@ export async function put<RequestType, ResponseType>(
 ): Promise<HttpResponse<ResponseType>> {
   return await http<ResponseType>(new Request(url, args));
 }
+export async function del(
+  url: string,
+  args: RequestInit = {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    }
+  }
+): Promise<HttpResponse<void>> {
+  return await http<void>(new Request(url, args));
+}
