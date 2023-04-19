@@ -1,5 +1,5 @@
 import { TableHead, TableRow, TableBody, IconButton, Table as MuiTable, SxProps, Theme, Typography, Paper } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
+import { ArrowForwardIos as RightArrow, Delete } from '@mui/icons-material';
 import TableCell from './Themed/ThemedTableCell';
 import { toShortDate } from '../../util/functions';
 
@@ -54,7 +54,7 @@ const Table: React.FC<TableProps> = ({ columnHeaders, data, onRowClick, onRowDel
 										<TableCell>
 											{onRowClick && (
 												<IconButton onClick={() => onRowClick(record)}>
-													<Edit />
+													<RightArrow />
 												</IconButton>
 											)}
 											{onRowDelete && (
